@@ -1,0 +1,22 @@
+{
+  "name": "quizwizard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Akbar Academy Quiz Wizard - Physics question bank and worksheet generator",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "extract": "node --max-old-space-size=6144 scripts/extract-from-legacy.mjs"
+  },
+  "dependencies": {
+    "jspdf": "^4.2.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.0",
+    "vite": "^8.2.2"
+  }
+}

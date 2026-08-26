@@ -1,0 +1,20 @@
+/*
+ * Overrides layered on top of the extracted legacy stylesheet.
+ * Keep legacy.css a verbatim copy of the original so re-running the extract
+ * script never clobbers hand-written rules.
+ */
+
+/*
+ * In the legacy build, `.pdf-page { background: #ffffff !important; }` is a
+ * shorthand, so it reset background-image with !important priority and beat the
+ * inline `el.style.backgroundImage = 'url(...)'` the worksheet set. The Akbar
+ * Academy watermark therefore never appeared in the on-screen preview, even
+ * though jsPDF drew it into every downloaded page.
+ *
+ * Routing the image through a custom property keeps the white page ground and
+ * lets the watermark through, so the preview matches the PDF.
+ */
+.pdf-page {
+  background-color: #ffffff !important;
+  background-image: var(--page-watermark, none) !important;
+}
