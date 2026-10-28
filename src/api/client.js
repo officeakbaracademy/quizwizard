@@ -1,19 +1,11 @@
 /**
- * Thin HTTP client.
- *
- * Every request goes through here so that switching from the bundled static
- * JSON to a live backend is a one-line environment change:
+ * Thin HTTP client. Every request to the backend goes through here.
  *
  *   .env.local
- *   VITE_API_BASE_URL=https://api.akbaracademy.co.uk
- *
- * With no VITE_API_BASE_URL set, `request()` reads the static snapshots under
- * public/data instead, and the rest of the app cannot tell the difference.
+ *   VITE_API_BASE_URL=/api/v1   (through the dev proxy, see vite.config.js)
  */
 
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
-
-export const isLiveApi = Boolean(API_BASE_URL);
 
 export class ApiError extends Error {
   constructor(message, { status, url } = {}) {
@@ -42,11 +34,10 @@ function buildUrl(pathOrUrl, params) {
  * @param {string} path         API path, e.g. "/questions"
  * @param {object} [options]
  * @param {object} [options.params]        query string values
- * @param {string} [options.staticPath]    file under public/ used when no API base is configured
  * @param {AbortSignal} [options.signal]
  */
-export async function request(path, { params, staticPath, signal, ...init } = {}) {
-  const url = isLiveApi || !staticPath ? buildUrl(path, params) : staticPath;
+export async function request(path, { params, signal, ...init } = {}) {
+  const url = buildUrl(path, params);
 
   let response;
   try {

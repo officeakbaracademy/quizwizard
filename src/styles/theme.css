@@ -1,0 +1,169 @@
+/* =========================================================================
+   Akbar Academy design tokens.
+
+   Two themes, both taken straight from the brand sheet:
+     dark  - Midnight #000000 ground, Electric and Mandarin accents
+     light - pure #FFFFFF ground, the same accents on black type
+
+   Brand colours never change between themes. Only the ground, the surfaces
+   and the type scale do.
+   ========================================================================= */
+
+:root {
+  /* Brand ----------------------------------------------------------------- */
+  --electric: #02bafd;
+  --electric-strong: #0198d4;
+  --electric-soft: rgba(2, 186, 253, 0.14);
+  --mandarin: #f9b602;
+  --mandarin-strong: #d89d02;
+  --mandarin-soft: rgba(249, 182, 2, 0.14);
+
+  /* Semantic -------------------------------------------------------------- */
+  --pass: #17b978;
+  --warn: #f9b602;
+  --alert: #ec5766;
+
+  /* Type ------------------------------------------------------------------ */
+  --font: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  /* Shape ----------------------------------------------------------------- */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+
+  /* Motion ---------------------------------------------------------------- */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --fast: 140ms var(--ease);
+  --slow: 260ms var(--ease);
+}
+
+/* Dark theme (default) ----------------------------------------------------- */
+:root,
+:root[data-theme='dark'] {
+  --bg: #000000;
+  --panel: #0a0a0c;
+  --panel-2: #121216;
+  --raised: #17171c;
+  --hover: #1d1d23;
+
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.18);
+
+  --text: #ffffff;
+  --text-2: #c9ced5;
+  --muted: #868d96;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 0 1px rgba(2, 186, 253, 0.35), 0 12px 32px rgba(2, 186, 253, 0.14);
+
+  --pass-soft: rgba(23, 185, 120, 0.16);
+  --pass-ink: #4fd6a1;
+  --warn-soft: rgba(249, 182, 2, 0.16);
+  --warn-ink: #f9c94a;
+  --alert-soft: rgba(236, 87, 102, 0.16);
+  --alert-ink: #ff8a95;
+
+  --scrim: rgba(0, 0, 0, 0.88);
+  --mascot-pad: radial-gradient(circle at 50% 42%, #1e1e26 0%, #0d0d11 72%);
+}
+
+/* Light theme -------------------------------------------------------------- */
+:root[data-theme='light'] {
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --panel-2: #f5f7f9;
+  --raised: #ffffff;
+  --hover: #eef2f5;
+
+  --line: rgba(0, 0, 0, 0.1);
+  --line-strong: rgba(0, 0, 0, 0.2);
+
+  --text: #0a0a0a;
+  --text-2: #3c434b;
+  --muted: #6b7078;
+
+  --shadow-sm: 0 1px 2px rgba(10, 14, 20, 0.08);
+  --shadow-md: 0 12px 32px rgba(10, 14, 20, 0.12);
+  --shadow-glow: 0 0 0 1px rgba(2, 186, 253, 0.45), 0 12px 30px rgba(2, 186, 253, 0.18);
+
+  --pass-soft: rgba(23, 185, 120, 0.14);
+  --pass-ink: #0f7d52;
+  --warn-soft: rgba(249, 182, 2, 0.18);
+  --warn-ink: #8a6400;
+  --alert-soft: rgba(236, 87, 102, 0.13);
+  --alert-ink: #c2313f;
+
+  --scrim: rgba(12, 16, 22, 0.55);
+  --mascot-pad: radial-gradient(circle at 50% 42%, #ffffff 0%, #eef2f6 74%);
+}
+
+/* Reset -------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font);
+  font-weight: 400;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  transition:
+    background-color var(--slow),
+    color var(--slow);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--electric);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--electric);
+  color: #000;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

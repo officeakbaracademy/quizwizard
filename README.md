@@ -1,11 +1,18 @@
 # Quiz Wizard
 
-Akbar Academy's physics question bank and worksheet generator, rebuilt in React.
+Akbar Academy's past paper question bank and worksheet generator, rebuilt in React
+and carrying the academy's own branding.
+
+The tool covers the full academy catalogue: Physics, Chemistry, Biology, Maths and
+English at IGCSE, AS and A2 across Cambridge, Edexcel and AQA. Which of those are
+live is worked out at runtime from the loaded questions, so a subject, level or
+board appears the moment its papers are imported, with no code change. Anything
+with no questions yet shows as "in build" rather than being hidden.
 
 This is a port of the original single-file build (`QW Desktop Version.html`), which
-carried 337 questions, ~79 MB of base64-inlined scans and the whole application in
-one 4,300-line HTML file. The behaviour is the same; the code is now split into
-components, the images are real files, and the data comes through an API layer.
+carried its questions and scans inside one 79 MB HTML file. All questions, page
+images and mark schemes now come from the Akbar Academy backend (the question bank
+API), so there is no data bundled with the app.
 
 ## Getting started
 
@@ -13,111 +20,94 @@ components, the images are real files, and the data comes through an API layer.
 npm install
 ```
 
+Create `.env.local` (it is git-ignored, never commit it):
+
+```bash
+VITE_API_BASE_URL=/api/v1
+VITE_API_TARGET=https://<backend-address>
+API_TOKEN=<question bank token>
+```
+
 ```bash
 npm run dev
 ```
 
-The app runs at http://localhost:5173.
+The app runs at http://localhost:5173. Restart it after changing `.env.local`.
 
-| Script            | What it does                                        |
-| ----------------- | --------------------------------------------------- |
-| `npm run dev`     | Vite dev server with hot reload                      |
-| `npm run build`   | Production build into `dist/`                        |
-| `npm run preview` | Serve the production build locally                   |
-| `npm run extract` | Re-import data from a legacy HTML build (see below)  |
+| Script            | What it does                         |
+| ----------------- | ------------------------------------ |
+| `npm run dev`     | Vite dev server with hot reload       |
+| `npm run build`   | Production build into `dist/`         |
+| `npm run preview` | Serve the production build locally    |
 
-## Connecting a backend
+## The backend
 
-Nothing in the components knows where the data comes from. Every request goes
-through `src/api/client.js`, which reads the static snapshots in `public/data`
-when no API base URL is configured:
+Everything comes from the question bank's search API,
+`GET /api/v1/admin/question-papers/questions/search`:
 
-```bash
-# .env.local
-VITE_API_BASE_URL=https://api.akbaracademy.co.uk
-```
+| In Quiz Wizard            | Search API options                         |
+| ------------------------- | ------------------------------------------ |
+| Loading the bank          | no filters, read page by page              |
+| Apply filters             | `syllabus`, `subject`, `paper`, `topic`, `difficulty` |
+| Generate by target marks  | `target_marks` (and `seed` across pages)   |
+| Sort by marks             | `sort_by=marks&sort_order=desc`            |
 
-Set that and the same three calls hit the live service instead:
+`src/api/backendQuestions.js` is the only file that knows the backend's field
+names; it turns each result into the question record the rest of the app uses.
+Question and mark scheme page images come from each question's `snapshots`.
+The worksheet and mark scheme PDFs are built in the browser from that data.
 
-| Function                  | API path                          | Static fallback                     |
-| ------------------------- | --------------------------------- | ----------------------------------- |
-| `fetchQuestions`          | `GET /questions`                  | `/data/questions.json`              |
-| `fetchQuestionImages`     | `GET /questions/images`           | `/data/question-images.json`        |
-| `fetchMarkSchemeImages`   | `GET /questions/markscheme-images`| `/data/markscheme-images.json`      |
-
-Expected shapes:
-
-```jsonc
-// GET /questions
-[
-  {
-    "id": "CAM_IGCSE_P4_2021_Q1",
-    "board": "Cambridge",
-    "level": "IGCSE",
-    "syllabus": "Cambridge IGCSE Physics",
-    "paper": "Paper 4",
-    "topic": "Motion, forces and energy",
-    "questionNumber": "1",
-    "part": "",
-    "questionType": "Mixed",
-    "ao": "AO2",
-    "difficulty": "Hard",
-    "marks": 10,
-    "questionText": "<p>...</p>",
-    "markScheme": "(a)(i) deceleration = ..."
-  }
-]
-
-// GET /questions/images  and  GET /questions/markscheme-images
-{
-  "CAM_IGCSE_P4_2021_Q1": ["/assets/questions/CAM_IGCSE_P4_2021_Q1-1.jpg"]
-}
-```
-
-Image values may be absolute URLs once a CDN is involved; they are passed
-straight to `<img src>` and to the PDF writer, so no component changes are
-needed.
-
-If the API is served from the same origin under `/api`, set
-`VITE_API_TARGET=http://localhost:4000` and Vite will proxy it in development.
+In development, `vite.config.js` proxies `/api` to `VITE_API_TARGET` and adds the
+`Authorization` header from `API_TOKEN`, so the token never reaches the browser,
+and the `ngrok-skip-browser-warning` header while the backend runs on ngrok.
 
 ## Project layout
 
 ```
 public/
-  data/                    question and image manifests (the static API snapshot)
-  assets/questions/        464 question page scans
-  assets/markschemes/      86 mark scheme scans
-  assets/watermark-*.jpg   Akbar Academy page underlays
+  brand/                   academy logos, subject mascots, exam board logos
+  assets/watermark-*.jpg   Akbar Academy page underlays for the PDFs
 src/
-  api/                     HTTP client and the question bank endpoints
+  api/                     HTTP client and the backend calls
   components/              UI, one file per panel or modal
+  hooks/useTheme.js        dark and light theme, remembered per browser
   hooks/useQuestionBank.js loads the bank once, exposes the image lookups
-  lib/                     filtering, mark scheme parsing, image loading
+  lib/brand.js             subjects, levels, boards and the brand asset paths
+  lib/                     course and filter helpers, mark scheme parsing, image loading
   lib/pdf/                 jsPDF worksheet and mark scheme writers
-  styles/legacy.css        stylesheet extracted verbatim from the old build
-  styles/app.css           the few overrides layered on top
-scripts/
-  extract-from-legacy.mjs  one-off migration from the old HTML file
+  styles/theme.css         design tokens: brand colours, dark and light themes
+  styles/app.css           component styles built on those tokens
 ```
 
-## Re-importing from a legacy HTML build
+## Branding
 
-When a new paper is added to the old single-file tool, pull the data across:
+Colours, type and assets all come from the Akbar Academy brand sheet.
 
-```bash
-npm run extract -- "C:/Users/hp/Downloads/QW Desktop Version.html"
-```
+| Token | Value | Used for |
+| ----- | ----- | -------- |
+| Electric | `#02BAFD` | primary actions, active states, accents |
+| Mandarin | `#F9B602` | marks, secondary actions, step numbers |
+| Midnight | `#000000` | dark theme ground |
+| White | `#FFFFFF` | light theme ground |
 
-It rewrites `public/data`, `public/assets` and `src/styles/legacy.css`. Local
-edits belong in `src/styles/app.css`, which the script never touches.
+Poppins is bundled through `@fontsource/poppins` rather than loaded from Google, so
+the tool renders correctly offline and never flashes a fallback face.
+
+Both themes are real: dark is true black, light is true white. The choice lives in
+`localStorage` under `aa-theme` and is applied to `<html>` by a small inline script
+in `index.html` before first paint.
+
+Exam board logos always sit on a white chip (`.board-chip`). Edexcel is navy and AQA
+is purple on transparent, so neither survives a black background on its own.
+
+Subject mascots, academy logos and board logos live in `public/brand/`. Replacing a
+file there updates every place it appears.
 
 ## Notes on the port
 
-- **Images are files, not base64.** The originals were inlined as data URLs,
-  which is what made the source file 79 MB. They are now written out as JPEGs
-  and referenced by URL, so the browser caches them and the API can serve them
-  later.
+- **Images come from the backend.** The originals were inlined as data URLs,
+  which is what made the source file 79 MB. Now each question's page images are
+  served by the backend and referenced by URL.
 - **jsPDF loads on demand.** It is only imported when a download starts, so it
   stays out of the initial bundle.
 - **The watermark now shows in the preview.** In the old build,

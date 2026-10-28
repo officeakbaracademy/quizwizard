@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import Icon from './Icon';
 import { formatMarkScheme } from '../lib/markScheme';
 import { totalMarksOf } from '../lib/questionBank';
 import { WATERMARK_ALL_URL, WATERMARK_MAIN_URL } from '../lib/watermarks';
@@ -73,21 +74,31 @@ function PageHeader({ title, marks }) {
   );
 }
 
-function CoverPage({ questionCount, totalMarks }) {
+function CoverPage({ title, subtitle, questionCount, totalMarks }) {
   return (
     <A4Page isCover>
       <div style={{ borderBottom: '2px solid #333', paddingBottom: '20px', marginBottom: '30px' }}>
         <h2
           style={{
             textAlign: 'center',
-            margin: '0 0 20px 0',
+            margin: '0 0 4px 0',
             color: 'black',
             fontSize: '20pt',
             fontWeight: 'bold',
           }}
         >
-          Physics Examination
+          {title}
         </h2>
+        <p
+          style={{
+            textAlign: 'center',
+            margin: '0 0 20px 0',
+            color: '#555',
+            fontSize: '11pt',
+          }}
+        >
+          {subtitle}
+        </p>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <tbody>
             <tr>
@@ -206,7 +217,10 @@ function QuestionPages({ question, index, images, markSchemeImages, includeMarkS
       pages.push(
         <A4Page key={`${question.id}-ms-text`}>
           <PageHeader title={msTitle} marks={question.marks} />
-          <div style={{ color: '#000' }} dangerouslySetInnerHTML={{ __html: formatMarkScheme(text) }} />
+          <div
+            style={{ color: '#000' }}
+            dangerouslySetInnerHTML={{ __html: formatMarkScheme(text) }}
+          />
         </A4Page>,
       );
     }
@@ -221,6 +235,8 @@ function QuestionPages({ question, index, images, markSchemeImages, includeMarkS
  */
 export default function WorksheetModal({
   questions,
+  paperTitle,
+  paperSubtitle,
   includeMarkSchemes,
   onIncludeMarkSchemesChange,
   getQuestionImages,
@@ -248,14 +264,19 @@ export default function WorksheetModal({
 
   if (!open) return null;
 
+  const totalMarks = totalMarksOf(questions);
+
   return (
     <div className="worksheet-modal" id="worksheetModal" data-open="true">
       <div className="worksheet-content" id="worksheetContentWrapper">
-        <span className="close-modal" role="button" tabIndex={0} onClick={onClose}>
-          ×
-        </span>
+        <button type="button" className="modal-close" onClick={onClose} aria-label="Close preview">
+          <Icon name="close" size={18} />
+        </button>
 
         <div className="worksheetTopBar">
+          <span className="sheet-label">
+            {questions.length} questions <span>· {totalMarks} marks</span>
+          </span>
           <label className="markschemeToggle">
             <input
               id="includeMarkSchemes"
@@ -263,45 +284,41 @@ export default function WorksheetModal({
               checked={includeMarkSchemes}
               onChange={(event) => onIncludeMarkSchemesChange(event.target.checked)}
             />
-            Show Answers (Mark Scheme)
+            Show answers
           </label>
         </div>
 
         <div id="worksheetContent">
-          <div style={{ width: '100%', padding: 0, margin: 0 }}>
-            <CoverPage questionCount={questions.length} totalMarks={totalMarksOf(questions)} />
-            {questions.map((question, index) => (
-              <QuestionPages
-                key={question.id}
-                question={question}
-                index={index}
-                images={getQuestionImages(question.id)}
-                markSchemeImages={getMarkSchemeImages(question.id)}
-                includeMarkSchemes={includeMarkSchemes}
-              />
-            ))}
-          </div>
+          <CoverPage
+            title={paperTitle}
+            subtitle={paperSubtitle}
+            questionCount={questions.length}
+            totalMarks={totalMarks}
+          />
+          {questions.map((question, index) => (
+            <QuestionPages
+              key={question.id}
+              question={question}
+              index={index}
+              images={getQuestionImages(question.id)}
+              markSchemeImages={getMarkSchemeImages(question.id)}
+              includeMarkSchemes={includeMarkSchemes}
+            />
+          ))}
         </div>
 
         <div className="worksheetActions">
-          <div className="row primaryRow">
-            <button type="button" className="btn-primary" onClick={onDownloadWorksheet}>
-              📥 Download Worksheet (PDF)
-            </button>
-            <button type="button" className="btn-primary" onClick={onDownloadMarkScheme}>
-              📝 Download Markscheme (PDF)
-            </button>
-          </div>
-          <div className="row secondaryRow" style={{ display: 'flex', justifyContent: 'center' }}>
-            <button
-              type="button"
-              className="btn-secondary"
-              style={{ maxWidth: '300px', width: '100%' }}
-              onClick={onClose}
-            >
-              Close
-            </button>
-          </div>
+          <button type="button" className="btn btn-primary" onClick={onDownloadWorksheet}>
+            <Icon name="download" size={18} />
+            Worksheet PDF
+          </button>
+          <button type="button" className="btn btn-gold" onClick={onDownloadMarkScheme}>
+            <Icon name="marker" size={18} />
+            Mark scheme PDF
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
     </div>

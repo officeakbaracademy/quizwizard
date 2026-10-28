@@ -1,5 +1,7 @@
 /** Pure helpers over the question bank. No React, no DOM. */
 
+import { BOARDS, LEVELS, SUBJECTS, boardOf, levelOf, subjectOf } from './brand';
+
 export const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 
 export const EMPTY_FILTERS = {
@@ -9,14 +11,19 @@ export const EMPTY_FILTERS = {
   difficulty: '',
 };
 
+export const EMPTY_COURSE = {
+  subject: '',
+  level: '',
+  board: '',
+};
+
 /**
- * Papers are counted per loaded paper file, not per paper label, so
- * "Paper 4 2021" and "Paper 4 2022" count as two.
+ * Papers are counted per uploaded paper, not per paper label, so two
+ * uploads both called "Paper 2" count as two.
  */
 export function getPaperInstanceKey(question) {
-  const tokenMatch = String(question.id || '').match(/_(\d{4}[A-Z]*)_Q\d+$/);
-  const token = tokenMatch ? tokenMatch[1] : '';
-  return `${question.paper}${token ? ` ${token}` : ''}`;
+  // Each question carries the id of the paper it was uploaded with.
+  return question.paperSetId;
 }
 
 export function summariseBank(questions) {
@@ -32,15 +39,71 @@ export function totalMarksOf(questions) {
   return questions.reduce((sum, q) => sum + (q.marks || 0), 0);
 }
 
-export function filterQuestions(questions, { syllabus, paper, topic, difficulty }) {
+/* -------------------------------------------------------------------------- */
+/* Course selection: subject -> level -> board                                */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Counts what the loaded bank actually holds for every subject, level and
+ * board in the academy catalogue. Combinations with a count of zero are the
+ * ones still being built, and the launcher shows them as such.
+ */
+export function buildCatalogue(questions) {
+  const bySubject = {};
+  const byLevel = {};
+  const byBoard = {};
+  const byCourse = {};
+
+  SUBJECTS.forEach((s) => {
+    bySubject[s.id] = 0;
+  });
+  LEVELS.forEach((l) => {
+    byLevel[l.id] = {};
+  });
+  BOARDS.forEach((b) => {
+    byBoard[b.id] = {};
+  });
+
+  questions.forEach((question) => {
+    const subject = subjectOf(question);
+    const level = levelOf(question);
+    const board = boardOf(question);
+
+    bySubject[subject] = (bySubject[subject] || 0) + 1;
+
+    byLevel[level] = byLevel[level] || {};
+    byLevel[level][subject] = (byLevel[level][subject] || 0) + 1;
+
+    byBoard[board] = byBoard[board] || {};
+    const boardKey = `${subject}|${level}`;
+    byBoard[board][boardKey] = (byBoard[board][boardKey] || 0) + 1;
+
+    const courseKey = `${subject}|${level}|${board}`;
+    byCourse[courseKey] = (byCourse[courseKey] || 0) + 1;
+  });
+
+  return {
+    subjectCount: (subject) => bySubject[subject] || 0,
+    levelCount: (level, subject) => (byLevel[level] && byLevel[level][subject]) || 0,
+    boardCount: (board, subject, level) =>
+      (byBoard[board] && byBoard[board][`${subject}|${level}`]) || 0,
+    courseCount: (subject, level, board) => byCourse[`${subject}|${level}|${board}`] || 0,
+  };
+}
+
+export function questionsForCourse(questions, { subject, level, board }) {
+  if (!subject || !level || !board) return [];
   return questions.filter(
-    (q) =>
-      (!syllabus || q.syllabus === syllabus) &&
-      (!paper || q.paper === paper) &&
-      (!topic || q.topic === topic) &&
-      (!difficulty || q.difficulty === difficulty),
+    (question) =>
+      subjectOf(question) === subject &&
+      levelOf(question) === level &&
+      boardOf(question) === board,
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/* Filtering                                                                  */
+/* -------------------------------------------------------------------------- */
 
 export function uniqueSyllabuses(questions) {
   return [...new Set(questions.map((q) => q.syllabus).filter(Boolean))];
@@ -53,29 +116,9 @@ export function uniqueSyllabuses(questions) {
 export function dependentOptions(questions, syllabus) {
   const source = syllabus ? questions.filter((q) => q.syllabus === syllabus) : questions;
   return {
-    papers: [...new Set(source.map((q) => q.paper).filter(Boolean))],
+    papers: [...new Set(source.map((q) => q.paper).filter(Boolean))].sort(),
     topics: [...new Set(source.map((q) => q.topic).filter(Boolean))].sort(),
   };
-}
-
-/**
- * Picks a random subset of `questions` whose marks add up to at most
- * `targetMarks`, stopping early on an exact hit.
- */
-export function selectQuestionsForMarks(questions, targetMarks) {
-  const shuffled = [...questions].sort(() => Math.random() - 0.5);
-  const selected = [];
-  let marks = 0;
-
-  for (const question of shuffled) {
-    if (marks + question.marks <= targetMarks) {
-      selected.push(question);
-      marks += question.marks;
-    }
-    if (marks === targetMarks) break;
-  }
-
-  return selected;
 }
 
 export function pluraliseMarks(marks) {

@@ -1,3 +1,4 @@
+import Icon from './Icon';
 import { formatMarkScheme } from '../lib/markScheme';
 import { pluraliseMarks } from '../lib/questionBank';
 
@@ -8,37 +9,33 @@ export default function MarkSchemeModal({ question, images, onClose }) {
   const text = String(question.markScheme || '').trim();
 
   return (
-    <div className="markscheme-modal" id="markschemeModal" style={{ display: 'flex' }}>
-      <div className="markscheme-content">
-        <span className="markscheme-close" role="button" tabIndex={0} onClick={onClose}>
-          ×
-        </span>
+    <div className="modal" id="markschemeModal" role="dialog" aria-modal="true">
+      <div className="modal-card">
+        <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
+          <Icon name="close" size={18} />
+        </button>
 
-        <div className="markscheme-header">
-          <p className="markscheme-title" id="markschemeTitle">
-            Mark Scheme – {question.paper} – Q{question.questionNumber}
-            {question.part || ''}
-          </p>
-          <p className="markscheme-meta" id="markschemeMeta">
-            {question.topic} • {question.questionType} • {pluraliseMarks(question.marks)}
-          </p>
+        <div className="modal-head">
+          <div>
+            <p className="modal-title">
+              Mark scheme · {question.paper} · Q{question.questionNumber}
+              {question.part || ''}
+            </p>
+            <p className="modal-meta">
+              {[question.topic, question.questionType, pluraliseMarks(question.marks)]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
+          </div>
         </div>
 
-        <div className="markscheme-body" id="markschemeBody">
+        <div className="modal-body">
           {images.length > 0 ? (
-            images.map((src, index) => (
-              <img
-                key={src}
-                src={src}
-                alt={`Mark scheme page ${index + 1}`}
-                style={{
-                  display: 'block',
-                  maxWidth: '100%',
-                  margin: '0 auto 16px auto',
-                  background: 'white',
-                }}
-              />
-            ))
+            <div className="scan">
+              {images.map((src, index) => (
+                <img key={src} src={src} alt={`Mark scheme page ${index + 1}`} />
+              ))}
+            </div>
           ) : text ? (
             <div dangerouslySetInnerHTML={{ __html: formatMarkScheme(text) }} />
           ) : (
@@ -48,13 +45,8 @@ export default function MarkSchemeModal({ question, images, onClose }) {
           )}
         </div>
 
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <button
-            type="button"
-            className="btn-secondary"
-            style={{ maxWidth: '300px', width: '100%' }}
-            onClick={onClose}
-          >
+        <div className="modal-foot">
+          <button type="button" className="btn btn-secondary" onClick={onClose}>
             Close
           </button>
         </div>

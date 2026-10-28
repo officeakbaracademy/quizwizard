@@ -1,3 +1,5 @@
+import Icon from './Icon';
+
 /** The two worksheet-generation cards: by target marks, and from ticked rows. */
 export default function WorksheetOptions({
   targetMarks,
@@ -8,59 +10,56 @@ export default function WorksheetOptions({
   onGenerateFromSelection,
 }) {
   return (
-    <div className="selection-panel">
-      <h3>📋 Worksheet Generation</h3>
+    <section className="panel">
+      <div className="panel-head">
+        <Icon name="checklist" size={18} />
+        <h3>Build a worksheet</h3>
+      </div>
 
-      <div className="worksheet-options">
+      <div className="panel-body">
         <div className="option-card">
-          <label htmlFor="targetMarks">🎯 Generate by Target Marks</label>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <label htmlFor="targetMarks">
+            <Icon name="target" size={13} /> By target marks
+          </label>
+          <div className="option-row">
             <input
               id="targetMarks"
+              className="field"
               type="number"
               min="1"
-              placeholder="Enter marks (e.g., 10)"
+              placeholder="e.g. 40"
               value={targetMarks}
               onChange={(event) => onTargetMarksChange(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') onGenerateByMarks();
               }}
             />
-            <button type="button" className="btn-success" onClick={onGenerateByMarks}>
+            <button type="button" className="btn btn-primary" onClick={onGenerateByMarks}>
               Generate
             </button>
           </div>
-          <small style={{ color: '#888888', marginTop: '5px', display: 'block' }}>
-            Randomly selects questions to reach target marks
+          <small className="option-hint">
+            Picks questions at random from the filtered list until it reaches the target.
           </small>
         </div>
 
         <div className="option-card">
-          <label>✅ Create from Selected Questions</label>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <div
-              style={{
-                flex: 1,
-                padding: '10px',
-                background: '#1a1a1a',
-                borderRadius: '5px',
-                textAlign: 'center',
-                border: '1px solid #00d9ff',
-              }}
-            >
-              <strong id="selectionInfo" style={{ color: '#00d9ff' }}>
-                {selectedCount} questions ({selectedMarks} marks)
-              </strong>
+          <label>
+            <Icon name="check" size={13} /> From the questions you tick
+          </label>
+          <div className="option-row">
+            <div className={`selection-readout${selectedCount > 0 ? ' has-selection' : ''}`}>
+              {selectedCount} selected · {selectedMarks} marks
             </div>
-            <button type="button" className="btn-success" onClick={onGenerateFromSelection}>
+            <button type="button" className="btn btn-gold" onClick={onGenerateFromSelection}>
               Create
             </button>
           </div>
-          <small style={{ color: '#888888', marginTop: '5px', display: 'block' }}>
-            Select questions using checkboxes below
+          <small className="option-hint">
+            Tick rows in the table below to build the worksheet by hand.
           </small>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

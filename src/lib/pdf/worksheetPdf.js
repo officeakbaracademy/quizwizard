@@ -13,19 +13,25 @@ import {
 } from './pdfCommon';
 import { totalMarksOf } from '../questionBank';
 
-function drawCoverPage(doc, drawWatermark, questions, totalMarks) {
+function drawCoverPage(doc, drawWatermark, questions, totalMarks, title, subtitle) {
   startPage(doc, drawWatermark, { isCover: true, addPage: false });
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
   doc.setTextColor(0, 0, 0);
-  doc.text('Physics Examination', A4_W / 2, PAD_Y + 8, { align: 'center' });
+  doc.text(title, A4_W / 2, PAD_Y + 8, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(85, 85, 85);
+  doc.text(subtitle, A4_W / 2, PAD_Y + 15, { align: 'center' });
+  doc.setTextColor(0, 0, 0);
 
   doc.setDrawColor(51, 51, 51);
   doc.setLineWidth(0.6);
-  doc.line(PAD_X, PAD_Y + 14, A4_W - PAD_X, PAD_Y + 14);
+  doc.line(PAD_X, PAD_Y + 20, A4_W - PAD_X, PAD_Y + 20);
 
-  const nameY = PAD_Y + 28;
+  const nameY = PAD_Y + 34;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.text('Candidate Name:', PAD_X, nameY);
@@ -79,6 +85,9 @@ export async function downloadWorksheetPdf({
   getQuestionImages,
   getMarkSchemeImages,
   includeMarkSchemes,
+  title = 'Worksheet',
+  subtitle = 'Akbar Academy',
+  fileSlug = 'worksheet',
   onProgress = () => {},
 }) {
   const doc = createDocument();
@@ -87,7 +96,7 @@ export async function downloadWorksheetPdf({
 
   onProgress('Rendering cover page...');
   await tick();
-  drawCoverPage(doc, drawWatermark, questions, totalMarks);
+  drawCoverPage(doc, drawWatermark, questions, totalMarks, title, subtitle);
 
   for (let qi = 0; qi < questions.length; qi++) {
     const question = questions[qi];
@@ -149,5 +158,5 @@ export async function downloadWorksheetPdf({
 
   onProgress('Saving PDF...');
   await tick();
-  doc.save('physics_worksheet.pdf');
+  doc.save(`akbar_${fileSlug}_worksheet.pdf`);
 }

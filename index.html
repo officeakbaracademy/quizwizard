@@ -1,9 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Akbar Academy - Edexcel Physics Question Database</title>
+    <meta name="color-scheme" content="dark light" />
+    <meta
+      name="description"
+      content="Akbar Academy Quiz Wizard. Build exam ready worksheets from real past paper questions across Physics, Chemistry, Biology, Maths and English for Cambridge, Edexcel and AQA."
+    />
+    <link rel="icon" type="image/png" href="/brand/akbar-mark-colour.png" />
+    <title>Quiz Wizard | Akbar Academy</title>
+    <script>
+      // Set the theme before first paint so the page never flashes the wrong one.
+      try {
+        var saved = localStorage.getItem('aa-theme');
+        if (saved === 'light' || saved === 'dark') {
+          document.documentElement.setAttribute('data-theme', saved);
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
