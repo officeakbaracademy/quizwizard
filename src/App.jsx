@@ -72,7 +72,8 @@ export default function App() {
     setSelectedIds(new Set());
   }, [courseQuestions]);
 
-  const stats = useMemo(() => summariseBank(courseQuestions), [courseQuestions]);
+  // The cards describe what's on screen, so they follow the filters.
+  const stats = useMemo(() => summariseBank(results), [results]);
   const syllabuses = useMemo(() => uniqueSyllabuses(courseQuestions), [courseQuestions]);
   const { papers, topics } = useMemo(
     () => dependentOptions(courseQuestions, filters.syllabus),
