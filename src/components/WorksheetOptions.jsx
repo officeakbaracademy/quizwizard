@@ -12,14 +12,13 @@ export default function WorksheetOptions({
   return (
     <section className="panel">
       <div className="panel-head">
-        <Icon name="checklist" size={18} />
         <h3>Build a worksheet</h3>
       </div>
 
       <div className="panel-body">
         <div className="option-card">
           <label htmlFor="targetMarks">
-            <Icon name="target" size={13} /> By target marks
+            By target marks
           </label>
           <div className="option-row">
             <input
@@ -45,11 +44,11 @@ export default function WorksheetOptions({
 
         <div className="option-card">
           <label>
-            <Icon name="check" size={13} /> From the questions you tick
+            From the questions you tick
           </label>
           <div className="option-row">
             <div className={`selection-readout${selectedCount > 0 ? ' has-selection' : ''}`}>
-              {selectedCount} selected · {selectedMarks} marks
+              {selectedCount} selected, {selectedMarks} marks
             </div>
             <button type="button" className="btn btn-gold" onClick={onGenerateFromSelection}>
               Create

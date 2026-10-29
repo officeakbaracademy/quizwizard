@@ -1,4 +1,3 @@
-import BoardLogo from './BoardLogo';
 import Icon from './Icon';
 import { BOARDS, LEVELS, SUBJECTS } from '../lib/brand';
 
@@ -23,7 +22,7 @@ function Availability({ count }) {
 }
 
 /**
- * The way in: subject, then level, then exam board. Everything Akbar Academy
+ * The way in: subject, then exam board, then level, the same as the AI Tutor. Everything Akbar Academy
  * teaches is shown, including the banks still being loaded, so the tool never
  * looks like a Physics-only tool.
  */
@@ -32,6 +31,11 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
 
   const courseCount =
     subject && level && board ? catalogue.courseCount(subject, level, board) : 0;
+  const picked = {
+    subject: SUBJECTS.find((s) => s.id === subject),
+    level: LEVELS.find((l) => l.id === level),
+    board: BOARDS.find((b) => b.id === board),
+  };
 
   return (
     <section className="launcher">
@@ -75,7 +79,6 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
                   <img src={item.icon} alt="" width="600" height="600" />
                 </span>
                 <span className="subject-name">{item.name}</span>
-                <span className="subject-meta">IGCSE · AS · A2</span>
                 <Availability count={count} />
               </button>
             );
@@ -85,11 +88,43 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
 
       {subject ? (
         <div className="step">
-          <StepLabel number="2" title="Choose a level" />
+          <StepLabel number="2" title="Choose an exam board" />
+          <div className="chip-row">
+            {BOARDS.map((item) => {
+              // A board is open if any level of this subject has questions for it.
+              const locked = LEVELS.every(
+                (l) => catalogue.courseCount(subject, l.id, item.id) === 0,
+              );
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={[
+                    'chip',
+                    board === item.id ? 'is-active' : '',
+                    locked ? 'is-locked' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  disabled={locked}
+                  aria-pressed={board === item.id}
+                  onClick={() => onChange('board', item.id)}
+                >
+                  {item.full}
+                  {locked ? <span className="chip-note">In build</span> : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
+      {subject && board ? (
+        <div className="step">
+          <StepLabel number="3" title="Choose a level" />
           <div className="chip-row">
             {LEVELS.map((item) => {
-              const count = catalogue.levelCount(item.id, subject);
-              const locked = count === 0;
+              const locked = catalogue.courseCount(subject, item.id, board) === 0;
               return (
                 <button
                   key={item.id}
@@ -105,9 +140,8 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
                   aria-pressed={level === item.id}
                   onClick={() => onChange('level', item.id)}
                 >
-                  {locked ? <Icon name="lock" size={14} /> : null}
                   {item.name}
-                  <span className="count">{locked ? 'in build' : `${count}`}</span>
+                  {locked ? <span className="chip-note">In build</span> : null}
                 </button>
               );
             })}
@@ -115,61 +149,24 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
         </div>
       ) : null}
 
-      {subject && level ? (
-        <div className="step">
-          <StepLabel number="3" title="Choose an exam board" />
-          <div className="board-grid">
-            {BOARDS.map((item) => {
-              const count = catalogue.boardCount(item.id, subject, level);
-              const locked = count === 0;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={[
-                    'board-card',
-                    board === item.id ? 'is-active' : '',
-                    locked ? 'is-locked' : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  disabled={locked}
-                  aria-pressed={board === item.id}
-                  onClick={() => onChange('board', item.id)}
-                >
-                  <BoardLogo board={item} />
-                  <span>
-                    <span className="board-name">{item.full}</span>
-                    <br />
-                    <span className="board-meta">
-                      {locked ? 'Question bank in build' : `${count} questions loaded`}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+      {/* Once the whole course is picked: a card for it, like the AI Tutor's
+          book card, with the button on the right. */}
+      {courseCount > 0 ? (
+        <div className="launcher-go" style={{ '--accent': picked.subject?.accent }}>
+          <span className="go-mascot">
+            <img src={picked.subject?.icon} alt="" />
+          </span>
+          <span className="go-text">
+            <span className="go-title">
+              {picked.board?.name} {picked.level?.name} {picked.subject?.name}
+            </span>
+            <span className="go-meta">{picked.board?.full}</span>
+          </span>
+          <button type="button" className="go-btn" onClick={onOpen}>
+            Open the question bank
+          </button>
         </div>
       ) : null}
-
-      <div className="launcher-go">
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={courseCount === 0}
-          onClick={onOpen}
-        >
-          Open the question bank
-          <Icon name="arrowRight" size={18} />
-        </button>
-        <span className="note">
-          {courseCount > 0
-            ? `${courseCount} questions ready in this course`
-            : subject && level && board
-              ? 'No questions in this course yet'
-              : 'Pick a subject, level and board to continue'}
-        </span>
-      </div>
     </section>
   );
 }

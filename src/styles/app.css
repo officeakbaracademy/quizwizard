@@ -28,13 +28,13 @@
 }
 
 /* ---------- Top bar -------------------------------------------------------- */
+/* The same as the AI Tutor's top bar. */
 
 .topbar {
   position: sticky;
   top: 0;
   z-index: 60;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: saturate(140%) blur(14px);
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
 
@@ -42,18 +42,32 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  height: 76px;
+  height: 62px;
+}
+
+/* The logo files have empty space built in, so they need this height to
+   look the same size as on the main website. */
+.topbar-logo {
+  flex: none;
 }
 
 .topbar-logo img {
-  height: 40px;
+  display: block;
+  height: 48px;
   width: auto;
 }
 
-.topbar-divider {
-  width: 1px;
-  height: 34px;
-  background: var(--line-strong);
+/* Dark is the default, so the dark logo shows unless light is chosen. */
+.topbar-logo .logo-light {
+  display: none;
+}
+
+:root[data-theme='light'] .topbar-logo .logo-light {
+  display: block;
+}
+
+:root[data-theme='light'] .topbar-logo .logo-dark {
+  display: none;
 }
 
 .topbar-product {
@@ -66,6 +80,7 @@
   font-weight: 600;
   font-size: 1.05rem;
   letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .topbar-product .name em {
@@ -85,48 +100,61 @@
   flex: 1;
 }
 
-.topbar-strap {
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--text-2);
-  letter-spacing: 0.02em;
-}
-
-.topbar-strap b {
-  color: var(--mandarin);
-  font-weight: 600;
-}
-
 /* ---------- Theme toggle --------------------------------------------------- */
+/* Soft pill toggle. Light: a very light pill with the active side as a
+   white block; dark: neutral charcoal with a soft grey block. */
 
 .theme-toggle {
+  --toggle-bg: #f4f6f8;
+  --toggle-active: #ffffff;
+  --toggle-active-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --toggle-icon: #a3abb6;
+  --toggle-icon-active: #000000;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--line);
+  flex: none;
+  gap: 4px;
+  padding: 4px;
   border-radius: var(--r-pill);
-  background: var(--panel-2);
+  background: var(--toggle-bg);
+}
+
+:root[data-theme='dark'] .theme-toggle {
+  --toggle-bg: #161616;
+  --toggle-active: #303030;
+  --toggle-active-shadow: none;
+  --toggle-icon: #8c8c8c;
+  --toggle-icon-active: #ffffff;
 }
 
 .theme-toggle button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 30px;
+  width: 46px;
+  height: 34px;
+  padding: 0;
+  border: none;
   border-radius: var(--r-pill);
-  color: var(--muted);
-  transition: all var(--fast);
+  background: transparent;
+  color: var(--toggle-icon);
+  cursor: pointer;
+  transition: background var(--fast), color var(--fast);
 }
 
 .theme-toggle button:hover {
-  color: var(--text);
+  color: var(--toggle-icon-active);
 }
 
 .theme-toggle button[aria-pressed='true'] {
-  background: var(--electric);
-  color: #00171f;
+  background: var(--toggle-active);
+  color: var(--toggle-icon-active);
+  box-shadow: var(--toggle-active-shadow);
+}
+
+.theme-toggle button:focus-visible {
+  outline: 2px solid var(--electric);
+  outline-offset: 2px;
 }
 
 /* ---------- Buttons -------------------------------------------------------- */
@@ -222,7 +250,7 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--electric);
+  color: var(--text);
   margin-bottom: 14px;
 }
 
@@ -291,6 +319,7 @@
 }
 
 /* ---------- Subject cards -------------------------------------------------- */
+/* The same as the AI Tutor's front page. */
 
 /* Fill each row, then centre whatever is left over, so five subjects never
    leave a hole in the last row at any width. */
@@ -298,12 +327,12 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .subject-grid > .subject-card {
-  flex: 0 1 calc(20% - 15px);
-  max-width: calc(20% - 15px);
+  flex: 0 1 calc(20% - 12px);
+  max-width: calc(20% - 12px);
   min-width: 0;
 }
 
@@ -312,57 +341,40 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 22px 16px 18px;
+  gap: 10px;
+  padding: 22px 12px 18px;
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  background: var(--panel-2);
+  background: var(--bg);
+  color: var(--text);
   text-align: center;
-  transition: all var(--slow);
-  overflow: hidden;
-}
-
-.subject-card::after {
-  content: '';
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 3px;
-  background: var(--accent, var(--electric));
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform var(--slow);
+  cursor: pointer;
+  transition: border-color var(--fast), transform var(--fast);
 }
 
 .subject-card:hover:not(.is-locked) {
-  border-color: var(--line-strong);
+  border-color: var(--accent);
   transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-}
-
-.subject-card:hover:not(.is-locked)::after,
-.subject-card.is-active::after {
-  transform: scaleX(1);
 }
 
 .subject-card.is-active {
-  border-color: var(--electric);
-  box-shadow: var(--shadow-glow);
+  border: 2px solid var(--accent);
+  padding: 21px 11px 17px;
 }
 
+/* In build: still in full colour (we're building it), just not clickable. */
 .subject-card.is-locked {
-  cursor: not-allowed;
-  opacity: 0.5;
+  cursor: default;
 }
 
+/* Mascot on a soft circle tinted with the subject's colour. */
 .subject-mascot {
-  width: 104px;
-  height: 104px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
-  background: var(--mascot-pad);
-  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
   display: grid;
   place-items: center;
-  margin-bottom: 10px;
   transition: transform var(--slow);
 }
 
@@ -371,35 +383,30 @@
 }
 
 .subject-mascot img {
-  width: 78%;
-  height: 78%;
+  width: 84%;
+  height: 84%;
   object-fit: contain;
 }
 
 .subject-card .subject-name {
   font-weight: 600;
-  font-size: 1.02rem;
-}
-
-.subject-card .subject-meta {
-  font-size: 0.8rem;
-  color: var(--muted);
+  font-size: 1rem;
 }
 
 .tag {
   display: inline-block;
-  margin-top: 8px;
+  white-space: nowrap;
   padding: 3px 10px;
   border-radius: var(--r-pill);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .tag-live {
-  background: var(--pass-soft);
-  color: var(--pass-ink);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--text);
 }
 
 .tag-build {
@@ -407,7 +414,7 @@
   color: var(--warn-ink);
 }
 
-/* ---------- Chips (levels) ------------------------------------------------- */
+/* ---------- Level chips ---------------------------------------------------- */
 
 .chip-row {
   display: flex;
@@ -418,38 +425,43 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  height: 44px;
-  padding: 0 20px;
+  gap: 10px;
+  height: 46px;
+  padding: 0 22px;
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
-  background: var(--panel-2);
-  font-weight: 500;
+  background: var(--bg);
+  color: var(--text);
   font-size: 0.92rem;
-  color: var(--text-2);
-  transition: all var(--fast);
+  font-weight: 500;
+  transition: border-color var(--fast), background var(--fast);
 }
 
 .chip:hover:not(.is-locked) {
-  border-color: var(--line-strong);
-  color: var(--text);
+  border-color: var(--electric);
 }
 
 .chip.is-active {
   background: var(--electric);
   border-color: var(--electric);
-  color: #001721;
+  color: #000;
   font-weight: 600;
 }
 
+/* In build: full colour, just not clickable. */
 .chip.is-locked {
-  opacity: 0.42;
-  cursor: not-allowed;
+  cursor: default;
 }
 
-.chip .count {
-  font-size: 0.76rem;
-  opacity: 0.75;
+.chip-note {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--warn-soft);
+  color: var(--warn-ink);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 /* ---------- Board cards ---------------------------------------------------- */
@@ -540,49 +552,141 @@
 
 /* ---------- Launcher footer ------------------------------------------------ */
 
+/* The chosen course as one card: mascot, name, and the button on the right. */
 .launcher-go {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 18px;
   margin-top: 36px;
-  padding-top: 26px;
-  border-top: 1px solid var(--line);
+  padding: 16px 16px 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--bg);
+  animation: fadeUp 0.25s ease;
 }
 
-.launcher-go .note {
-  color: var(--muted);
-  font-size: 0.88rem;
+.go-mascot {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  display: grid;
+  place-items: center;
+}
+
+.go-mascot img {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+}
+
+.go-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.go-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.go-meta {
+  font-size: 0.85rem;
+}
+
+/* Mandarin, with rounded square corners. */
+.go-btn {
+  flex: none;
+  padding: 14px 26px;
+  border: none;
+  border-radius: 12px;
+  background: var(--mandarin);
+  color: #000;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--fast);
+}
+
+.go-btn:hover {
+  background: #ffc21f;
+}
+
+/* Phones: a more compact card, with the button full width under the
+   course name. */
+@media (max-width: 600px) {
+  .launcher-go {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+    padding: 12px;
+  }
+
+  .go-mascot {
+    width: 44px;
+    height: 44px;
+  }
+
+  .go-title {
+    font-size: 0.95rem;
+  }
+
+  .go-meta {
+    font-size: 0.78rem;
+  }
+
+  .go-btn {
+    flex: 1 1 100%;
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+  }
 }
 
 /* ---------- Course bar ----------------------------------------------------- */
 
+/* One row on every screen: mascot, course name, and the button on the
+   right. The text shortens with "..." rather than pushing the button down. */
 .coursebar {
   display: flex;
   align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
-  padding: 14px 20px;
+  gap: 16px;
+  padding: 14px 16px 14px 18px;
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   background: var(--panel-2);
 }
 
 .coursebar-mascot {
+  flex: none;
+  display: grid;
+  place-items: center;
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  background: var(--mascot-pad);
-  border: 1px solid var(--line);
-  display: grid;
-  place-items: center;
-  flex: none;
+  background: color-mix(in srgb, var(--accent, var(--electric)) 16%, transparent);
 }
 
 .coursebar-mascot img {
-  width: 80%;
-  height: 80%;
+  width: 84%;
+  height: 84%;
   object-fit: contain;
+}
+
+.coursebar-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.coursebar-text .course-title,
+.coursebar-text .course-sub {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .coursebar-text .course-title {
@@ -592,12 +696,77 @@
 }
 
 .coursebar-text .course-sub {
-  font-size: 0.82rem;
-  color: var(--muted);
+  font-size: 0.84rem;
 }
 
-.coursebar-spacer {
-  flex: 1;
+.coursebar-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color var(--fast);
+}
+
+.coursebar-btn:hover {
+  border-color: var(--electric);
+}
+
+/* "Change" alone is for phones only. */
+.coursebar-btn-short {
+  display: none;
+}
+
+/* Phones: a smaller mascot, and the button becomes a square icon button. */
+@media (max-width: 560px) {
+  .coursebar {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .coursebar-mascot {
+    width: 44px;
+    height: 44px;
+  }
+
+  .coursebar-text .course-title {
+    font-size: 0.98rem;
+  }
+
+  /* Just the course name on phones. */
+  .coursebar-text .course-sub {
+    display: none;
+  }
+
+  .coursebar-btn {
+    height: 36px;
+    padding: 0 12px;
+    gap: 6px;
+    font-size: 0.8rem;
+  }
+
+  .coursebar-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .coursebar-btn-label {
+    display: none;
+  }
+
+  .coursebar-btn-short {
+    display: inline;
+  }
 }
 
 /* ---------- Stats ---------------------------------------------------------- */
@@ -721,18 +890,19 @@
   width: 100%;
 }
 
+/* A thin rounded chevron for the drop-downs, black in light mode and
+   white in dark mode. */
 .filter-group select {
   appearance: none;
-  padding-right: 38px;
-  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
-    linear-gradient(135deg, currentColor 50%, transparent 50%);
-  background-position:
-    calc(100% - 20px) 21px,
-    calc(100% - 15px) 21px;
-  background-size:
-    5px 5px,
-    5px 5px;
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 14px center;
+  background-size: 18px 18px;
   background-repeat: no-repeat;
+}
+
+:root[data-theme='dark'] .filter-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
 .filter-group select option {
@@ -768,8 +938,12 @@
   border-top: 1px solid var(--line);
 }
 
+/* The small icon and its label, centred on one line. */
 .option-card > label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  line-height: 1;
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -845,9 +1019,10 @@
   overflow: hidden;
 }
 
+/* Pages of 20 keep the table short, so the page scrolls instead of a box
+   inside it. It still scrolls sideways on narrow screens. */
 .table-scroll {
-  max-height: 640px;
-  overflow: auto;
+  overflow-x: auto;
 }
 
 table {
@@ -1012,15 +1187,20 @@ input[type='checkbox']:checked::before {
   gap: 8px;
 }
 
+/* "View" buttons for the question and the mark scheme. */
 .asset-btn {
-  display: inline-grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--line-strong);
   background: var(--panel);
-  color: var(--text-2);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
   transition: all var(--fast);
 }
 
@@ -1037,8 +1217,8 @@ input[type='checkbox']:checked::before {
 }
 
 .asset-empty {
-  color: var(--muted);
-  opacity: 0.4;
+  font-size: 0.8rem;
+  opacity: 0.5;
 }
 
 /* ---------- Empty / loading states ---------------------------------------- */
@@ -1209,7 +1389,6 @@ input[type='checkbox']:checked::before {
   border: 1px solid var(--line-strong);
   border-radius: var(--r-pill);
   background: var(--panel);
-  box-shadow: var(--shadow-md);
 }
 
 .worksheetTopBar .sheet-label {
@@ -1245,21 +1424,58 @@ input[type='checkbox']:checked::before {
   right: 20px;
 }
 
+/* A floating bar with the two downloads: frosted glass, rounded square
+   buttons, the same yellow and blue as the rest of the app. */
 .worksheetActions {
   position: fixed;
   left: 50%;
-  bottom: 22px;
+  bottom: 24px;
   transform: translateX(-50%);
   z-index: 1002;
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 12px 16px;
+  gap: 6px;
+  padding: 6px;
   border: 1px solid var(--line-strong);
-  border-radius: var(--r-pill);
-  background: var(--panel);
-  box-shadow: var(--shadow-md);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+.ws-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 11px;
+  color: #000;
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--fast), transform var(--fast);
+}
+
+.ws-download:hover {
+  transform: translateY(-1px);
+}
+
+.ws-download-sheet {
+  background: var(--electric);
+}
+
+.ws-download-sheet:hover {
+  background: #0198d4;
+}
+
+.ws-download-ms {
+  background: var(--mandarin);
+}
+
+.ws-download-ms:hover {
+  background: #ffc21f;
 }
 
 /* A4 pages. These mirror the generated PDF page for page, so they stay white
@@ -1366,18 +1582,42 @@ input[type='checkbox']:checked::before {
   }
 
   .topbar-inner {
-    height: 66px;
+    height: 58px;
     gap: 12px;
   }
 
   .topbar-logo img {
-    height: 30px;
+    height: 44px;
   }
 
-  .topbar-strap,
-  .topbar-divider,
-  .topbar-product .tagline {
+  /* Less empty space above the heading on phones. */
+  .page {
+    padding-top: 18px;
+  }
+
+  .launcher {
+    padding-top: 0;
+  }
+
+  /* Phones show just the logo and the switch, like the AI Tutor. */
+  .topbar-product {
     display: none;
+  }
+
+  /* A slimmer switch on phones. */
+  .theme-toggle {
+    gap: 2px;
+    padding: 3px;
+  }
+
+  .theme-toggle button {
+    width: 36px;
+    height: 28px;
+  }
+
+  .theme-toggle svg {
+    width: 17px;
+    height: 17px;
   }
 
   .subject-grid {
@@ -1427,12 +1667,614 @@ input[type='checkbox']:checked::before {
   .worksheetActions {
     left: 12px;
     right: 12px;
+    bottom: 12px;
     transform: none;
-    border-radius: var(--r-lg);
   }
 
-  .worksheetActions .btn {
+  .ws-download {
     flex: 1;
-    min-width: 140px;
+    min-width: 0;
+    height: 38px;
+    padding: 0 10px;
+    gap: 6px;
+    font-size: 0.82rem;
+  }
+}
+
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Small phones: the label above the heading keeps its words but drops the
+   yellow line and the star. */
+@media (max-width: 500px) {
+  /* Keeps "60 questions" on one line in the narrow cards. */
+  .subject-card .tag {
+    padding: 3px 8px;
+    font-size: 0.64rem;
+    letter-spacing: 0.03em;
+  }
+
+  .launcher-head .eyebrow::before,
+  .launcher-head .eyebrow svg {
+    display: none;
+  }
+}
+
+/* Small phones: smaller level and board buttons, so they don't take over
+   the screen. */
+@media (max-width: 500px) {
+  .chip-row {
+    gap: 8px;
+  }
+
+  .chip {
+    height: 38px;
+    padding: 0 15px;
+    gap: 8px;
+    font-size: 0.84rem;
+  }
+
+  .chip-note {
+    padding: 2px 6px;
+    font-size: 0.6rem;
+  }
+}
+
+/* Slimmer buttons with lighter text, on every screen. */
+.chip {
+  height: 40px;
+  padding: 0 18px;
+  font-weight: 400;
+}
+
+.chip.is-active {
+  font-weight: 500;
+}
+
+@media (max-width: 500px) {
+  .chip {
+    height: 34px;
+    padding: 0 14px;
+  }
+}
+
+.go-title {
+  font-weight: 500;
+}
+
+.go-btn {
+  padding: 12px 22px;
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .go-btn {
+    padding: 10px 16px;
+  }
+}
+
+/* ---------- Notice pop-up (instead of browser alerts) ---------------------- */
+
+.notice-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: var(--scrim);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.15s ease;
+}
+
+.notice-card {
+  --notice: var(--mandarin);
+  width: 100%;
+  max-width: 400px;
+  padding: 28px 26px 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--bg);
+  color: var(--text);
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  animation: fadeUp 0.2s ease;
+}
+
+.notice-error {
+  --notice: var(--alert);
+}
+
+.notice-info {
+  --notice: var(--electric);
+}
+
+.notice-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--notice) 16%, transparent);
+  color: var(--notice);
+}
+
+.notice-title {
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.notice-message {
+  margin-top: 8px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+/* The technical reason, small, for when something breaks. */
+.notice-detail {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  opacity: 0.6;
+  word-break: break-word;
+}
+
+.notice-btn {
+  margin-top: 22px;
+  min-width: 120px;
+  padding: 11px 28px;
+  border: none;
+  border-radius: 12px;
+  background: var(--mandarin);
+  color: #000;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--fast);
+}
+
+.notice-btn:hover {
+  background: #ffc21f;
+}
+
+.notice-btn:focus-visible {
+  outline: 2px solid var(--electric);
+  outline-offset: 2px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Course picker: the exact border, heading and number styles of the AI
+   Tutor's front page. */
+:root[data-theme='dark'] {
+  --picker-line: rgba(255, 255, 255, 0.14);
+}
+
+:root[data-theme='light'] {
+  --picker-line: rgba(0, 0, 0, 0.14);
+}
+
+.launcher .subject-card:not(.is-active),
+.launcher .chip:not(.is-active),
+.launcher-go {
+  border-color: var(--picker-line);
+}
+
+.launcher .step-label h2 {
+  font-size: 1.05rem;
+}
+
+.launcher .step-number {
+  color: #000;
+  font-size: 0.8rem;
+}
+
+/* Small phones: smaller buttons, boxes and drop-downs on the question bank
+   page, with lighter text. */
+@media (max-width: 560px) {
+  .btn {
+    height: 40px;
+    padding: 0 16px;
+    gap: 7px;
+    border-radius: 12px;
+    font-size: 0.86rem;
+    font-weight: 500;
+  }
+
+  .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .field {
+    height: 42px;
+    font-size: 0.88rem;
+  }
+
+  .selection-readout {
+    height: 40px;
+    font-size: 0.84rem;
+    font-weight: 500;
+  }
+}
+
+/* ---------- Pagination ----------------------------------------------------- */
+
+#resultsCount {
+  scroll-margin-top: 80px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.pagination-info {
+  font-size: 0.86rem;
+}
+
+.pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--picker-line, var(--line-strong));
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--fast), background var(--fast);
+}
+
+.page-btn:hover:not(:disabled):not(.is-active) {
+  border-color: var(--electric);
+}
+
+.page-btn.is-active {
+  background: var(--electric);
+  border-color: var(--electric);
+  color: #000;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.page-gap {
+  padding: 0 4px;
+  opacity: 0.6;
+}
+
+/* Phones: the buttons in the middle, arrows without words. */
+@media (max-width: 560px) {
+  .pagination {
+    justify-content: center;
+  }
+
+  .page-btn {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+  }
+
+  .page-step-label {
+    display: none;
+  }
+}
+
+.ws-download svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Small phones: tighter "Narrow the question bank" and "Build a worksheet"
+   panels, with less empty space and one button per line. */
+@media (max-width: 560px) {
+  .panel-grid {
+    gap: 14px;
+  }
+
+  .panel-head {
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .panel-head h3 {
+    font-size: 0.9rem;
+  }
+
+  .panel-body {
+    padding: 14px;
+  }
+
+  .filter-section {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .filter-group {
+    gap: 5px;
+  }
+
+  .filter-group label,
+  .option-card > label {
+    font-size: 0.66rem;
+  }
+
+  .option-card > label {
+    margin-bottom: 7px;
+  }
+
+  .button-group {
+    gap: 8px;
+  }
+
+  /* One button per line on small screens. */
+  .button-group {
+    flex-direction: column;
+  }
+
+  .button-group .btn {
+    width: 100%;
+  }
+
+  .option-card + .option-card {
+    margin-top: 14px;
+    padding-top: 14px;
+  }
+
+  /* The box on one line, its button full width underneath. */
+  .option-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .option-row .btn {
+    width: 100%;
+  }
+
+  /* In a column, "flex: 1" squashes the boxes' height, so they keep their
+     own height here. */
+  .option-row .field,
+  .option-row .selection-readout {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .option-row .field {
+    height: 42px;
+  }
+
+  .option-row .selection-readout {
+    height: 42px;
+  }
+
+  .selection-readout {
+    border-radius: var(--r-md);
+  }
+
+  .option-hint {
+    margin-top: 7px;
+    font-size: 0.76rem;
+  }
+
+  /* Question count and Sort by marks on one line. */
+  .results-header {
+    flex-wrap: nowrap;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .results-count {
+    font-size: 0.88rem;
+  }
+
+  .results-header .btn {
+    flex: none;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Computers: the two panels stack full width and each lies on its side,
+   so neither leaves an empty gap under it.
+   Filters: the three drop-downs and the buttons on one row.
+   Worksheet: "By target marks" and "From the questions you tick" side by side. */
+@media (min-width: 901px) {
+  .panel-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-body:has(> .filter-section) {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+  }
+
+  .panel-body > .filter-section {
+    flex: 1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 0;
+  }
+
+  .panel-body > .button-group {
+    flex: none;
+    flex-wrap: nowrap;
+  }
+
+  .panel-body:has(> .option-card) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .option-card + .option-card {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    margin-left: 28px;
+    padding-left: 28px;
+    border-left: 1px solid var(--line);
+  }
+}
+
+/* Section headings ("Narrow the question bank", "Build a worksheet") on a
+   soft blue strip so they stand out from the panel. */
+.panel-head {
+  background: color-mix(in srgb, var(--electric) 8%, var(--panel-2));
+}
+
+/* Small phones: compact stat cards, a smaller number and a label that fits
+   on one line. */
+@media (max-width: 560px) {
+  .stats {
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px 14px;
+  }
+
+  .stat-card::before {
+    top: 12px;
+    bottom: 12px;
+  }
+
+  .stat-number {
+    font-size: 1.3rem;
+  }
+
+  .stat-label {
+    margin-top: 1px;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Small phones: the question count on its own line, with a small
+   Sort by marks button on the line under it. */
+@media (max-width: 560px) {
+  .results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .results-count {
+    font-size: 0.86rem;
+  }
+
+  .results-header .btn {
+    height: 32px;
+    padding: 0 10px;
+    gap: 6px;
+    font-size: 0.78rem;
+  }
+
+  .results-header .btn svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+
+/* Very small phones: a slightly smaller course bar so "IGCSE Physics" and
+   the Change button both fit. */
+@media (max-width: 360px) {
+  .coursebar {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .coursebar-mascot {
+    width: 38px;
+    height: 38px;
+  }
+
+  .coursebar-text .course-title {
+    font-size: 0.9rem;
+  }
+
+  .coursebar-btn {
+    padding: 0 10px;
+  }
+}
+
+/* Softer, less rounded corners on the course picker: cards, buttons and the
+   course card. */
+.subject-card,
+.launcher-go {
+  border-radius: 12px;
+}
+
+.launcher .chip {
+  border-radius: 10px;
+}
+
+.go-btn {
+  border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+  .go-btn {
+    border-radius: 8px;
+  }
+}
+
+/* Front page: the same narrower, centred width as the AI Tutor's front
+   page, so there's more space on the left and right. */
+.launcher {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* Top bar: the same width as the AI Tutor's (1280 wide, centred), so the
+   logo and switch line up closer to the page content. */
+.topbar .shell {
+  max-width: 1280px;
+  padding: 0 24px;
+}
+
+@media (max-width: 720px) {
+  .topbar .shell {
+    padding: 0 16px;
   }
 }

@@ -1,16 +1,26 @@
+import { useEffect } from 'react';
 import Icon from './Icon';
 import { formatMarkScheme } from '../lib/markScheme';
 import { pluraliseMarks } from '../lib/questionBank';
 
 /** Shows the cropped mark scheme pages when they exist, otherwise the text version. */
 export default function MarkSchemeModal({ question, images, onClose }) {
+  // Esc closes it, the same as the X.
+  useEffect(() => {
+    if (!question) return undefined;
+    const onKey = (event) => event.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [question, onClose]);
+
   if (!question) return null;
 
   const text = String(question.markScheme || '').trim();
 
   return (
-    <div className="modal" id="markschemeModal" role="dialog" aria-modal="true">
-      <div className="modal-card">
+    // Clicking the dimmed background closes it; clicks inside the card don't.
+    <div className="modal" id="markschemeModal" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="modal-card" onClick={(event) => event.stopPropagation()}>
         <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
           <Icon name="close" size={18} />
         </button>
@@ -18,13 +28,13 @@ export default function MarkSchemeModal({ question, images, onClose }) {
         <div className="modal-head">
           <div>
             <p className="modal-title">
-              Mark scheme · {question.paper} · Q{question.questionNumber}
+              Mark scheme, {question.paper} Q{question.questionNumber}
               {question.part || ''}
             </p>
             <p className="modal-meta">
               {[question.topic, question.questionType, pluraliseMarks(question.marks)]
                 .filter(Boolean)
-                .join(' · ')}
+                .join(', ')}
             </p>
           </div>
         </div>
@@ -45,11 +55,6 @@ export default function MarkSchemeModal({ question, images, onClose }) {
           )}
         </div>
 
-        <div className="modal-foot">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>
-            Close
-          </button>
-        </div>
       </div>
     </div>
   );

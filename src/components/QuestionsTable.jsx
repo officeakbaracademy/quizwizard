@@ -1,4 +1,3 @@
-import Icon from './Icon';
 
 export default function QuestionsTable({
   questions,
@@ -85,7 +84,7 @@ export default function QuestionsTable({
                         aria-label={`View question ${question.questionNumber}`}
                         onClick={() => onPreview(question)}
                       >
-                        <Icon name="document" size={17} />
+                        View
                       </button>
                     </td>
                     <td>
@@ -98,10 +97,10 @@ export default function QuestionsTable({
                             aria-label={`View the mark scheme for question ${question.questionNumber}`}
                             onClick={() => onViewMarkScheme(question)}
                           >
-                            <Icon name="marker" size={17} />
+                            View
                           </button>
                         ) : (
-                          <span className="asset-empty">—</span>
+                          <span className="asset-empty">Not added</span>
                         )}
                       </span>
                     </td>

@@ -262,6 +262,14 @@ export default function WorksheetModal({
     };
   }, [open]);
 
+  // Esc closes the preview.
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (event) => event.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const totalMarks = totalMarksOf(questions);
@@ -275,7 +283,7 @@ export default function WorksheetModal({
 
         <div className="worksheetTopBar">
           <span className="sheet-label">
-            {questions.length} questions <span>· {totalMarks} marks</span>
+            {questions.length} questions, <span>{totalMarks} marks</span>
           </span>
           <label className="markschemeToggle">
             <input
@@ -307,17 +315,15 @@ export default function WorksheetModal({
           ))}
         </div>
 
+        {/* The two downloads. The X at the top (or Esc) closes the preview. */}
         <div className="worksheetActions">
-          <button type="button" className="btn btn-primary" onClick={onDownloadWorksheet}>
+          <button type="button" className="ws-download ws-download-sheet" onClick={onDownloadWorksheet}>
             <Icon name="download" size={18} />
             Worksheet PDF
           </button>
-          <button type="button" className="btn btn-gold" onClick={onDownloadMarkScheme}>
-            <Icon name="marker" size={18} />
+          <button type="button" className="ws-download ws-download-ms" onClick={onDownloadMarkScheme}>
+            <Icon name="markScheme" size={18} />
             Mark scheme PDF
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={onClose}>
-            Close
           </button>
         </div>
       </div>

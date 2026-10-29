@@ -10,6 +10,8 @@ import QuestionsTable from './components/QuestionsTable';
 import StatsGrid from './components/StatsGrid';
 import SubjectLauncher from './components/SubjectLauncher';
 import TopBar from './components/TopBar';
+import NoticeModal from './components/NoticeModal';
+import Pagination from './components/Pagination';
 import WorksheetModal from './components/WorksheetModal';
 import WorksheetOptions from './components/WorksheetOptions';
 
@@ -29,6 +31,8 @@ import {
   uniqueSyllabuses,
 } from './lib/questionBank';
 
+const TABLE_PAGE_SIZE = 20;
+
 export default function App() {
   const { theme, setTheme } = useTheme();
 
@@ -45,8 +49,16 @@ export default function App() {
   const [course, setCourse] = useState(EMPTY_COURSE);
   const [view, setView] = useState('launcher');
 
+  // Switching between the course picker and the question bank always starts
+  // at the top of the new page.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view]);
+
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [results, setResults] = useState([]);
+  // The table shows the results 20 at a time.
+  const [tablePage, setTablePage] = useState(1);
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [targetMarks, setTargetMarks] = useState('');
 
@@ -55,6 +67,9 @@ export default function App() {
   const [previewQuestion, setPreviewQuestion] = useState(null);
   const [markSchemeQuestion, setMarkSchemeQuestion] = useState(null);
   const [pdfProgress, setPdfProgress] = useState(null);
+  // The pop-up message shown in place of a browser alert.
+  const [notice, setNotice] = useState(null);
+  const closeNotice = useCallback(() => setNotice(null), []);
   // Filters the current results came from, sent with worksheet requests.
   const [appliedFilters, setAppliedFilters] = useState(EMPTY_FILTERS);
 
@@ -71,6 +86,22 @@ export default function App() {
     setFilters(EMPTY_FILTERS);
     setSelectedIds(new Set());
   }, [courseQuestions]);
+
+  // New results (a filter, a sort, another course) start again on page 1.
+  useEffect(() => {
+    setTablePage(1);
+  }, [results]);
+
+  const pageQuestions = useMemo(
+    () => results.slice((tablePage - 1) * TABLE_PAGE_SIZE, tablePage * TABLE_PAGE_SIZE),
+    [results, tablePage],
+  );
+
+  // Changing page brings the top of the table back into view.
+  const handlePageChange = useCallback((page) => {
+    setTablePage(page);
+    document.getElementById('resultsCount')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   // The cards describe what's on screen, so they follow the filters.
   const stats = useMemo(() => summariseBank(results), [results]);
@@ -107,7 +138,7 @@ export default function App() {
     setCourse((previous) => {
       // Changing a step upstream invalidates everything after it.
       if (key === 'subject') return { subject: value, level: '', board: '' };
-      if (key === 'level') return { ...previous, level: value, board: '' };
+      if (key === 'board') return { ...previous, board: value, level: '' };
       return { ...previous, [key]: value };
     });
   }, []);
@@ -133,7 +164,7 @@ export default function App() {
       setResults(await searchBackendQuestions(filters, courseQuestions));
     } catch (searchError) {
       console.error('Filter search failed:', searchError);
-      window.alert('Could not filter the question bank. Please try again.');
+      setNotice({ tone: 'error', title: "Couldn't filter the questions", message: 'Please try again.' });
     }
   }, [courseQuestions, filters]);
 
@@ -147,7 +178,11 @@ export default function App() {
   // its function in api/worksheets.js throws and the teacher sees why.
   const showApiError = useCallback((apiError) => {
     console.error(apiError);
-    window.alert(apiError.message || 'Something went wrong. Please try again.');
+    setNotice({
+      tone: 'error',
+      title: 'Something went wrong',
+      message: apiError.message || 'Please try again.',
+    });
   }, []);
 
   /** Puts results in the order of the ids the API returns. */
@@ -203,7 +238,10 @@ export default function App() {
     const target = parseInt(targetMarks, 10);
 
     if (!target || target <= 0) {
-      window.alert('Please enter a valid number of marks');
+      setNotice({
+        title: 'Enter a number of marks',
+        message: 'Type how many marks the worksheet should add up to, for example 40.',
+      });
       return;
     }
 
@@ -214,13 +252,18 @@ export default function App() {
         targetMarks: target,
       });
       if (pick.ids.length === 0) {
-        window.alert('No questions with marks match these filters. Try widening them.');
+        setNotice({
+          title: 'No questions found',
+          message: 'No questions with marks match these filters. Try widening them.',
+        });
         return;
       }
       if (!pick.targetReached) {
-        window.alert(
-          `These filters only have ${pick.selectedMarks} marks of questions, so the worksheet uses all of them.`,
-        );
+        setNotice({
+          tone: 'info',
+          title: 'Fewer marks than you asked for',
+          message: `These filters only have ${pick.selectedMarks} marks of questions, so the worksheet uses all of them.`,
+        });
       }
       setWorksheetQuestions(orderResults(pick.ids));
     } catch (apiError) {
@@ -230,7 +273,10 @@ export default function App() {
 
   const handleGenerateFromSelection = useCallback(() => {
     if (selectedQuestions.length === 0) {
-      window.alert('Please select at least one question using the checkboxes');
+      setNotice({
+        title: 'No questions selected',
+        message: 'Tick at least one question using the checkboxes.',
+      });
       return;
     }
     setWorksheetQuestions(selectedQuestions);
@@ -260,9 +306,12 @@ export default function App() {
       });
     } catch (pdfError) {
       console.error('Worksheet PDF generation error:', pdfError);
-      window.alert(
-        `Unable to download the worksheet PDF. Please try again.\n\n${pdfError?.message ?? ''}`,
-      );
+      setNotice({
+        tone: 'error',
+        title: "Couldn't download the worksheet",
+        message: 'Please try again.',
+        detail: pdfError?.message,
+      });
     } finally {
       setPdfProgress(null);
     }
@@ -290,9 +339,12 @@ export default function App() {
       });
     } catch (pdfError) {
       console.error('Markscheme PDF generation error:', pdfError);
-      window.alert(
-        `Unable to download the mark scheme PDF. Please try again.\n\n${pdfError?.message ?? ''}`,
-      );
+      setNotice({
+        tone: 'error',
+        title: "Couldn't download the mark scheme",
+        message: 'Please try again.',
+        detail: pdfError?.message,
+      });
     } finally {
       setPdfProgress(null);
     }
@@ -312,8 +364,7 @@ export default function App() {
             <div className="state-card">
               <h3>The question bank could not be loaded</h3>
               <p>
-                Check that the data files are being served, then try again. Nothing you have
-                selected has been lost.
+                The question bank server may be offline. Please try again in a moment.
               </p>
               <button type="button" className="btn btn-primary" onClick={reload}>
                 <Icon name="reset" size={17} />
@@ -377,8 +428,9 @@ export default function App() {
               <section className="section">
                 <div className="results-header">
                   <div className="results-count" id="resultsCount">
-                    <b>{results.length}</b> questions ·{' '}
-                    <span className="marks">{totalMarksOf(results)} marks</span> available
+                    <b>{results.length}</b> questions,{' '}
+                    <span className="marks">{totalMarksOf(results)} marks</span>
+                    <span className="results-count-tail"> available</span>
                   </div>
                   <button type="button" className="btn btn-secondary btn-sm" onClick={handleSortByMarks}>
                     <Icon name="sort" size={16} />
@@ -387,7 +439,7 @@ export default function App() {
                 </div>
 
                 <QuestionsTable
-                  questions={results}
+                  questions={pageQuestions}
                   selectedIds={selectedIds}
                   allSelected={allFilteredSelected}
                   onToggleQuestion={handleToggleQuestion}
@@ -395,6 +447,13 @@ export default function App() {
                   onPreview={setPreviewQuestion}
                   onViewMarkScheme={setMarkSchemeQuestion}
                   hasMarkScheme={hasMarkScheme}
+                />
+
+                <Pagination
+                  page={tablePage}
+                  pageSize={TABLE_PAGE_SIZE}
+                  total={results.length}
+                  onPageChange={handlePageChange}
                 />
               </section>
             </>
@@ -428,6 +487,7 @@ export default function App() {
       />
 
       <PdfProgressOverlay message={pdfProgress} />
+      <NoticeModal notice={notice} onClose={closeNotice} />
     </div>
   );
 }

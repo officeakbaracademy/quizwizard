@@ -51,9 +51,10 @@
   --line: rgba(255, 255, 255, 0.09);
   --line-strong: rgba(255, 255, 255, 0.18);
 
+  /* All text is pure white on black, the same as the AI Tutor. */
   --text: #ffffff;
-  --text-2: #c9ced5;
-  --muted: #868d96;
+  --text-2: #ffffff;
+  --muted: #ffffff;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.6);
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.7);
@@ -70,20 +71,33 @@
   --mascot-pad: radial-gradient(circle at 50% 42%, #1e1e26 0%, #0d0d11 72%);
 }
 
+/* Scrollbars and form controls follow the chosen theme, so light mode never
+   shows a black scrollbar. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
 /* Light theme -------------------------------------------------------------- */
 :root[data-theme='light'] {
+  /* Pure white surfaces in light mode, like the AI Tutor; borders keep the
+     cards apart. */
   --bg: #ffffff;
   --panel: #ffffff;
-  --panel-2: #f5f7f9;
+  --panel-2: #ffffff;
   --raised: #ffffff;
   --hover: #eef2f5;
 
   --line: rgba(0, 0, 0, 0.1);
   --line-strong: rgba(0, 0, 0, 0.2);
 
-  --text: #0a0a0a;
-  --text-2: #3c434b;
-  --muted: #6b7078;
+  /* All text is pure black on white, the same as the AI Tutor. */
+  --text: #000000;
+  --text-2: #000000;
+  --muted: #000000;
 
   --shadow-sm: 0 1px 2px rgba(10, 14, 20, 0.08);
   --shadow-md: 0 12px 32px rgba(10, 14, 20, 0.12);

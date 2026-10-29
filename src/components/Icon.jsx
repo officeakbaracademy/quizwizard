@@ -17,6 +17,14 @@ const PATHS = {
       <path d="M14 3v5h5" />
     </>
   ),
+  // A page with a tick: the mark scheme, next to the plain page for the paper.
+  markScheme: (
+    <>
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" />
+      <path d="M14 3v5h5" />
+      <path d="m9 14.5 2 2 4-4" />
+    </>
+  ),
   check: <path d="m4 12.5 5 5L20 6.5" />,
   checklist: (
     <>

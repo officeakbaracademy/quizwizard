@@ -40,7 +40,7 @@ export function totalMarksOf(questions) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Course selection: subject -> level -> board                                */
+/* Course selection: subject, board and level                                 */
 /* -------------------------------------------------------------------------- */
 
 /**

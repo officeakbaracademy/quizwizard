@@ -1,14 +1,23 @@
+import { useEffect } from 'react';
 import Icon from './Icon';
 import { pluraliseMarks } from '../lib/questionBank';
 
 /** Read-only look at a question's scanned pages, or its text if there are none. */
 export default function PreviewModal({ question, images, onClose }) {
+  // Esc closes it, the same as the X.
+  useEffect(() => {
+    if (!question) return undefined;
+    const onKey = (event) => event.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [question, onClose]);
+
   if (!question) return null;
 
-
   return (
-    <div className="modal" id="previewModal" role="dialog" aria-modal="true">
-      <div className="modal-card">
+    // Clicking the dimmed background closes it; clicks inside the card don't.
+    <div className="modal" id="previewModal" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="modal-card" onClick={(event) => event.stopPropagation()}>
         <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
           <Icon name="close" size={18} />
         </button>
@@ -16,13 +25,13 @@ export default function PreviewModal({ question, images, onClose }) {
         <div className="modal-head">
           <div>
             <p className="modal-title">
-              {question.paper} · Q{question.questionNumber}
+              {question.paper} Q{question.questionNumber}
               {question.part || ''}
             </p>
             <p className="modal-meta">
               {[question.topic, question.difficulty, pluraliseMarks(question.marks)]
                 .filter(Boolean)
-                .join(' · ')}
+                .join(', ')}
             </p>
           </div>
         </div>
@@ -43,11 +52,6 @@ export default function PreviewModal({ question, images, onClose }) {
           )}
         </div>
 
-        <div className="modal-foot">
-          <button type="button" className="btn btn-secondary" onClick={onClose}>
-            Close
-          </button>
-        </div>
       </div>
     </div>
   );

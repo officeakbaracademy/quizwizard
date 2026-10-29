@@ -34,7 +34,6 @@ export default function FilterPanel({
   return (
     <section className="panel">
       <div className="panel-head">
-        <Icon name="filter" size={18} />
         <h3>Narrow the question bank</h3>
       </div>
 

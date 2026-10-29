@@ -1,4 +1,3 @@
-import BoardLogo from './BoardLogo';
 import Icon from './Icon';
 import { getLevel, getSubject } from '../lib/brand';
 
@@ -10,7 +9,7 @@ export default function CourseBar({ course, questionCount, onChange }) {
   if (!subject) return null;
 
   return (
-    <div className="coursebar">
+    <div className="coursebar" style={{ '--accent': subject.accent }}>
       <span className="coursebar-mascot">
         <img src={subject.icon} alt="" width="600" height="600" />
       </span>
@@ -21,17 +20,21 @@ export default function CourseBar({ course, questionCount, onChange }) {
           {subject.name}
         </div>
         <div className="course-sub">
-          {course.board} · {questionCount} questions in this bank
+          {course.board}, {questionCount} questions in this bank
         </div>
       </div>
 
-      <span className="coursebar-spacer" />
-
-      <BoardLogo board={course.board} small />
-
-      <button type="button" className="btn btn-secondary btn-sm" onClick={onChange}>
+      {/* On phones the button says just "Change", so it still reads as one. */}
+      <button
+        type="button"
+        className="coursebar-btn"
+        onClick={onChange}
+        aria-label="Change course"
+        title="Change course"
+      >
         <Icon name="swap" size={16} />
-        Change course
+        <span className="coursebar-btn-label">Change course</span>
+        <span className="coursebar-btn-short">Change</span>
       </button>
     </div>
   );
