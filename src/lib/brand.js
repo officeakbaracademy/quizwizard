@@ -8,19 +8,6 @@
  * anything with no questions yet is shown as "in build" rather than hidden.
  */
 
-/**
- * The full colour lockup is the one the app shows, in both themes. Electric and
- * Mandarin carry it on black, and the greyscale strapline carries it on white,
- * so there is no need to swap in the all-white version. The reversed and white
- * files stay here for anything that needs a single-colour mark.
- */
-export const LOGO = {
-  lockup: '/brand/akbar-logo-colour.png',
-  lockupWhite: '/brand/akbar-logo-white.png',
-  mark: '/brand/akbar-mark-colour.png',
-  markWhite: '/brand/akbar-mark-white.png',
-};
-
 export const SUBJECTS = [
   { id: 'physics', name: 'Physics', icon: '/brand/subjects/physics.png', accent: '#02bafd' },
   { id: 'chemistry', name: 'Chemistry', icon: '/brand/subjects/chemistry.png', accent: '#6fcf3a' },
@@ -40,15 +27,13 @@ export const BOARDS = [
     id: 'Cambridge',
     name: 'Cambridge',
     full: 'Cambridge International',
-    logo: '/brand/boards/cambridge.png',
   },
   {
     id: 'Edexcel',
     name: 'Edexcel',
     full: 'Pearson Edexcel International',
-    logo: '/brand/boards/edexcel.png',
   },
-  { id: 'AQA', name: 'AQA', full: 'AQA and Oxford AQA', logo: '/brand/boards/aqa.png' },
+  { id: 'AQA', name: 'AQA', full: 'AQA and Oxford AQA' },
 ];
 
 export const getSubject = (id) => SUBJECTS.find((s) => s.id === id) || null;
