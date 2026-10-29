@@ -10,6 +10,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       port: 5173,
+      // Lets a shared tunnel link (ngrok or Cloudflare) open this dev server.
+      allowedHosts: ['.ngrok-free.app', '.ngrok-free.dev', '.ngrok.app', '.trycloudflare.com'],
       // Proxy is only used once VITE_API_BASE_URL points at a relative path
       // like "/api/v1". Set VITE_API_TARGET to the backend origin to enable it.
       // The proxy adds the token here, so it is not in the browser's code.

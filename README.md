@@ -116,3 +116,14 @@ file there updates every place it appears.
   worksheet set. The watermark was therefore missing on screen even though jsPDF
   always drew it into the PDF. `src/styles/app.css` routes it through a custom
   property so the preview matches the download.
+
+## Putting it online with Vercel
+
+1. In Vercel, import the GitHub repo. Vercel finds Vite by itself (build `npm run build`, output `dist`).
+2. In Settings, Environment Variables, add the same values as `.env.local`:
+   `VITE_API_BASE_URL` (`/api/v1`), `VITE_API_TARGET` (the backend address) and `API_TOKEN`.
+3. Deploy.
+
+On your laptop, the proxy in `vite.config.js` adds the token to every backend call. Vercel has no such proxy, so `api/backend.js` does the same job online: `vercel.json` sends every `/api/v1/...` call to it, and it forwards the call with the token. `API_TOKEN` stays in Vercel's settings and never reaches the browser.
+
+When the backend address changes, update `VITE_API_TARGET` in Vercel and redeploy.

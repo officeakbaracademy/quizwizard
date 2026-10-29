@@ -4,7 +4,7 @@
  * A question record:
  *
  *   {
- *     id, board, level, syllabus, apiSyllabus, subject, paper, paperSetId,
+ *     id, board, level, syllabus, subject, paper, paperSetId,
  *     topic, questionNumber, part, questionType, ao, difficulty,
  *     marks, questionText, markScheme
  *   }

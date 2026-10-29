@@ -5,23 +5,23 @@ import { API_BASE_URL, request } from './client';
  * of the app already understands (see questions.js). Only this file knows
  * the backend's field names, so if they change, this is the one place to fix.
  *
- * Backend: GET /admin/question-papers/questions/search, paginated, one row
- * per question with its parts, mark schemes and page snapshots folded in.
+ * Backend: GET /question-bank/questions/search (the student search, which
+ * works with the normal token, not the admin one), paginated, one row per
+ * question with its board, level, subject, parts and page snapshots.
  */
 
 const PAGE_SIZE = 100; // the most the backend allows per page
-const BOARD_NAMES = ['Cambridge', 'Edexcel', 'AQA'];
 
 /**
  * Every matching question, page by page until there are no more.
- * filters: { syllabus, paper, topic, difficulty } in the backend's own values;
+ * filters: { board, level, subject, paper, topic, difficulty } in the backend's own values;
  * leave one out (or empty) to not filter by it.
  */
 async function fetchAllRows(signal, filters = {}) {
   const rows = [];
   let seed;
   for (let page = 1; ; page += 1) {
-    const data = await request('/admin/question-papers/questions/search', {
+    const data = await request('/question-bank/questions/search', {
       params: { ...filters, seed, page, page_size: PAGE_SIZE },
       signal,
     });
@@ -42,25 +42,6 @@ function assetUrl(url) {
   return new URL(url, API_BASE_URL).href;
 }
 
-/** "Edexcel" or "Cambridge IGCSE Physics" -> "Edexcel" / "Cambridge". */
-function boardFrom(syllabus) {
-  const lower = String(syllabus || '').toLowerCase();
-  return BOARD_NAMES.find((board) => lower.includes(board.toLowerCase())) || syllabus || '';
-}
-
-function levelFrom(syllabus) {
-  const upper = String(syllabus || '').toUpperCase();
-  if (upper.includes('A2') || /A[- ]?LEVEL/.test(upper)) return 'A2';
-  if (upper.includes('AS')) return 'AS';
-  return 'IGCSE';
-}
-
-/** "Edexcel" + "Physics" -> "Edexcel Physics"; full names are kept as they are. */
-function syllabusLabel(row) {
-  const syllabus = row.syllabus || '';
-  const subject = row.subject || '';
-  return syllabus.toLowerCase().includes(subject.toLowerCase()) ? syllabus : `${syllabus} ${subject}`.trim();
-}
 
 /** "hard" -> "Hard", to match the difficulty dropdown. */
 function capitalise(value) {
@@ -114,10 +95,9 @@ function snapshotsOf(row, kind) {
 }
 
 /**
- * Snapshot kinds mean different things by question type:
- *   MCQ:     "combined" = question with options A to D, "question" = without
- *            the options, "answer" = the options only. Mark scheme is text.
- *   Written: "question" = question pages, "answer" = mark scheme pages.
+ * Snapshot kinds: "question" (the question), "options" (MCQ options A to D),
+ * "combined" (an MCQ with its options) and "mark_scheme" (mark scheme pages).
+ * MCQs show the combined picture so the options are included.
  */
 function questionPageImages(row) {
   const combined = snapshotsOf(row, 'combined');
@@ -125,18 +105,16 @@ function questionPageImages(row) {
 }
 
 function markSchemePageImages(row) {
-  return isMultipleChoice(row) ? [] : snapshotsOf(row, 'answer');
+  return snapshotsOf(row, 'mark_scheme');
 }
 
 function toQuestion(row) {
-  const syllabus = syllabusLabel(row);
   return {
     id: row.id,
-    board: boardFrom(row.syllabus),
-    level: levelFrom(row.syllabus),
-    syllabus,
-    // The backend's own syllabus name, needed when filtering through the API.
-    apiSyllabus: row.syllabus,
+    board: row.board,
+    level: row.level,
+    // A readable course name, e.g. "Cambridge IGCSE Physics".
+    syllabus: [row.board, row.level, row.subject].filter(Boolean).join(' '),
     subject: row.subject,
     paper: row.paper,
     paperSetId: row.paper_set_id,
@@ -172,16 +150,16 @@ export async function fetchBackendQuestionBank({ signal } = {}) {
 }
 
 /**
- * The app's filters in the API's own values, kept to the open course:
- * its subject, and its syllabus when the course has only one.
+ * The app's filters in the API's own values, kept to the open course
+ * (its board, level and subject).
  * questions: the ones loaded for the chosen course.
  */
 function apiFilters(filters, questions) {
-  const syllabuses = [...new Set(questions.map((q) => q.apiSyllabus))];
-  const chosen = questions.find((q) => q.syllabus === filters.syllabus)?.apiSyllabus;
+  const course = questions[0] || {};
   return {
-    subject: questions[0]?.subject,
-    syllabus: chosen || (syllabuses.length === 1 ? syllabuses[0] : undefined),
+    board: course.board,
+    level: course.level,
+    subject: course.subject,
     paper: filters.paper,
     topic: filters.topic,
     difficulty: filters.difficulty.toLowerCase(),
@@ -206,10 +184,6 @@ export async function searchBackendQuestions(filters, questions, { signal } = {}
  */
 export async function pickBackendQuestionsByMarks(filters, questions, targetMarks) {
   const params = apiFilters(filters, questions);
-  // The API takes one exact syllabus; without it the pick could include other boards.
-  if (!params.syllabus) {
-    throw new Error('Please choose a syllabus in the filters first, then press Apply filters.');
-  }
   const { rows, data } = await fetchAllRows(undefined, { ...params, target_marks: targetMarks });
   return {
     ids: rows.map((row) => row.id),

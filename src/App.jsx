@@ -17,7 +17,7 @@ import { searchBackendQuestions } from './api/questions';
 import { pickQuestionsByMarks, sortQuestionsByMarks } from './api/worksheets';
 import { useQuestionBank } from './hooks/useQuestionBank';
 import { useTheme } from './hooks/useTheme';
-import { BOARDS, LOGO, getLevel, getSubject } from './lib/brand';
+import { getLevel, getSubject } from './lib/brand';
 import {
   EMPTY_COURSE,
   EMPTY_FILTERS,
@@ -400,20 +400,6 @@ export default function App() {
           )}
         </div>
       </main>
-
-      <footer className="footer">
-        <div className="shell footer-inner">
-          <img src={LOGO.lockup} alt="Akbar Academy" width="2767" height="658" />
-          <span>Questions are reproduced from past papers for teaching and revision use.</span>
-          <span className="footer-boards">
-            {BOARDS.map((boardEntry) => (
-              <span key={boardEntry.id} className="board-chip board-chip-sm">
-                <img src={boardEntry.logo} alt={`${boardEntry.full} logo`} loading="lazy" />
-              </span>
-            ))}
-          </span>
-        </div>
-      </footer>
 
       <WorksheetModal
         questions={worksheetQuestions}

@@ -1345,35 +1345,6 @@ input[type='checkbox']:checked::before {
   color: var(--text);
 }
 
-/* ---------- Footer --------------------------------------------------------- */
-
-.footer {
-  border-top: 1px solid var(--line);
-  padding: 22px 0;
-}
-
-.footer-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  font-size: 0.82rem;
-  color: var(--muted);
-}
-
-.footer-inner img {
-  height: 26px;
-  width: auto;
-  opacity: 0.75;
-}
-
-.footer-boards {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 /* ---------- Responsive ----------------------------------------------------- */
 
 @media (max-width: 1180px) {
