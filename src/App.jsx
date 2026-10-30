@@ -367,9 +367,15 @@ export default function App() {
         <div className="shell">
           {error ? (
             <div className="state-card">
-              <h3>The question bank could not be loaded</h3>
+              <h3>
+                {error.studentCheck
+                  ? "Couldn't check your subjects"
+                  : 'The question bank could not be loaded'}
+              </h3>
               <p>
-                The question bank server may be offline. Please try again in a moment.
+                {error.studentCheck
+                  ? `The school server said: ${error.message}`
+                  : 'The question bank server may be offline. Please try again in a moment.'}
               </p>
               <button type="button" className="btn btn-primary" onClick={reload}>
                 <Icon name="reset" size={17} />

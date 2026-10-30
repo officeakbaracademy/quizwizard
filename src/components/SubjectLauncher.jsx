@@ -51,8 +51,11 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
 
       <div className="step">
         <StepLabel number="1" title="Choose a subject" />
+        {SUBJECTS.some((item) => catalogue.allows(item.id)) ? null : (
+          <p className="empty-note">No subjects are set up for your account yet.</p>
+        )}
         <div className="subject-grid">
-          {SUBJECTS.map((item) => {
+          {SUBJECTS.filter((item) => catalogue.allows(item.id)).map((item) => {
             const count = catalogue.subjectCount(item.id);
             const locked = !loading && count === 0;
             return (
@@ -87,7 +90,7 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
           <StepLabel number="2" title="Choose an exam board" />
           <div className="chip-row">
             {/* The boards the catalog API lists, with its own names. */}
-            {catalogue.boards.map((item) => {
+            {catalogue.boards.filter((item) => catalogue.allows(subject, item)).map((item) => {
               // A board is open if any level of this subject has questions for it.
               const locked = catalogue.levels.every(
                 (l) => catalogue.courseCount(subject, l, item) === 0,
@@ -121,7 +124,7 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
           <StepLabel number="3" title="Choose a level" />
           <div className="chip-row">
             {/* The levels the catalog API lists, with its own names. */}
-            {catalogue.levels.map((item) => {
+            {catalogue.levels.filter((item) => catalogue.allows(subject, board, item)).map((item) => {
               const locked = catalogue.courseCount(subject, item, board) === 0;
               return (
                 <button

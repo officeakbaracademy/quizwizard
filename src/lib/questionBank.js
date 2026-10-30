@@ -62,9 +62,20 @@ export function buildCatalogue(catalog) {
   }));
   const count = (match) => courses.filter(match).reduce((sum, c) => sum + c.total, 0);
 
+  // The student's own courses (null: no student, so everything is shown).
+  const student = catalog?.student
+    ? catalog.student.map((c) => ({ ...c, subject: subjectOf({ subject: c.subject }) }))
+    : null;
+
   return {
     boards: (catalog?.boards || []).map((board) => board.name),
     levels: (catalog?.levels || []).map((level) => level.name),
+    // Whether the student has this subject (and board, and level, when given).
+    allows: (subject, board, level) =>
+      !student ||
+      student.some(
+        (c) => c.subject === subject && (!board || c.board === board) && (!level || c.level === level),
+      ),
     subjectCount: (subject) => count((c) => c.subject === subject),
     courseCount: (subject, level, board) =>
       count((c) => c.subject === subject && c.level === level && c.board === board),

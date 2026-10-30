@@ -2162,3 +2162,11 @@ input[type='checkbox']:checked::before {
     padding: 0 16px;
   }
 }
+
+/* Shown when the student has no subjects set up yet. */
+.empty-note {
+  padding: 18px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 12px;
+  font-size: 0.92rem;
+}

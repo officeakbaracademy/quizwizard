@@ -1,3 +1,6 @@
 {
-  "rewrites": [{ "source": "/api/v1/:path*", "destination": "/api/backend?__path=:path*" }]
+  "rewrites": [
+    { "source": "/api/v1/:path*", "destination": "/api/backend?__path=:path*" },
+    { "source": "/student-api/:path*", "destination": "/api/student?__path=:path*" }
+  ]
 }
