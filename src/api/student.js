@@ -29,7 +29,8 @@ function toBoard(text) {
   const value = text.toLowerCase();
   if (value.includes('cambridge')) return 'Cambridge';
   if (value.includes('edexcel')) return 'Edexcel';
-  if (value.includes('aqa')) return 'AQA';
+  // "Oxford International GCSE" and "Oxford International AQA" are both AQA.
+  if (value.includes('aqa') || value.includes('oxford')) return 'AQA';
   return null;
 }
 
