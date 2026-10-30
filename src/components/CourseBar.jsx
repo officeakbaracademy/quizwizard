@@ -1,10 +1,9 @@
 import Icon from './Icon';
-import { getLevel, getSubject } from '../lib/brand';
+import { getSubject } from '../lib/brand';
 
 /** The sticky reminder of which course is open, with the way back to the launcher. */
 export default function CourseBar({ course, questionCount, onChange }) {
   const subject = getSubject(course.subject);
-  const level = getLevel(course.level);
 
   if (!subject) return null;
 
@@ -16,7 +15,7 @@ export default function CourseBar({ course, questionCount, onChange }) {
 
       <div className="coursebar-text">
         <div className="course-title">
-          {level ? `${level.name} ` : ''}
+          {course.level ? `${course.level} ` : ''}
           {subject.name}
         </div>
         <div className="course-sub">

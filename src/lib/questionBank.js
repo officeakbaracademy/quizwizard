@@ -1,6 +1,6 @@
 /** Pure helpers over the question bank. No React, no DOM. */
 
-import { boardOf, levelOf, subjectOf } from './brand';
+import { subjectOf } from './brand';
 
 export const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 
@@ -51,10 +51,11 @@ export function totalMarksOf(questions) {
  * catalog: what fetchCatalog returns, or null while it loads.
  */
 export function buildCatalogue(catalog) {
+  // Boards and levels are shown with the API's own names, e.g. "Cambridge", "AS".
   const courses = (catalog?.courses || []).map((course) => ({
     subject: subjectOf({ subject: course.name }),
-    level: levelOf({ level: course.level }),
-    board: boardOf({ board: course.board }),
+    level: course.level,
+    board: course.board,
     total: course.total || 0,
     papers: course.papers || [],
     topics: (course.topics || []).filter((t) => t.active !== false).map((t) => t.name),
@@ -62,6 +63,8 @@ export function buildCatalogue(catalog) {
   const count = (match) => courses.filter(match).reduce((sum, c) => sum + c.total, 0);
 
   return {
+    boards: (catalog?.boards || []).map((board) => board.name),
+    levels: (catalog?.levels || []).map((level) => level.name),
     subjectCount: (subject) => count((c) => c.subject === subject),
     courseCount: (subject, level, board) =>
       count((c) => c.subject === subject && c.level === level && c.board === board),
@@ -74,9 +77,7 @@ export function questionsForCourse(questions, { subject, level, board }) {
   if (!subject || !level || !board) return [];
   return questions.filter(
     (question) =>
-      subjectOf(question) === subject &&
-      levelOf(question) === level &&
-      boardOf(question) === board,
+      subjectOf(question) === subject && question.level === level && question.board === board,
   );
 }
 

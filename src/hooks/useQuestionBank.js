@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchQuestionBank } from '../api/questions';
-import { getBoard, getLevel, getSubject } from '../lib/brand';
+import { getSubject } from '../lib/brand';
 
 const EMPTY = [];
 
@@ -20,8 +20,8 @@ export function useQuestionBank(course) {
 
   // The course in the API's own names, e.g. { subject: "Physics", ... }.
   const subjectName = getSubject(course.subject)?.name;
-  const levelName = getLevel(course.level)?.id;
-  const boardName = getBoard(course.board)?.id;
+  const levelName = course.level;
+  const boardName = course.board;
 
   const load = useCallback(() => {
     if (!subjectName || !levelName || !boardName) {

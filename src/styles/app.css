@@ -498,10 +498,6 @@
   font-weight: 600;
 }
 
-.go-meta {
-  font-size: 0.85rem;
-}
-
 /* Mandarin, with rounded square corners. */
 .go-btn {
   flex: none;
@@ -537,10 +533,6 @@
 
   .go-title {
     font-size: 0.95rem;
-  }
-
-  .go-meta {
-    font-size: 0.78rem;
   }
 
   .go-btn {

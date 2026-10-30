@@ -20,7 +20,7 @@ import { pickQuestionsByMarks, sortQuestionsByMarks } from './api/worksheets';
 import { useCatalog } from './hooks/useCatalog';
 import { useQuestionBank } from './hooks/useQuestionBank';
 import { useTheme } from './hooks/useTheme';
-import { getLevel, getSubject } from './lib/brand';
+import { getSubject } from './lib/brand';
 import {
   EMPTY_COURSE,
   EMPTY_FILTERS,
@@ -126,8 +126,7 @@ export default function App() {
     results.length > 0 && results.every((question) => selectedIds.has(question.id));
 
   const subject = getSubject(course.subject);
-  const level = getLevel(course.level);
-  const paperTitle = subject ? `${level ? `${level.name} ` : ''}${subject.name}` : 'Worksheet';
+  const paperTitle = subject ? `${course.level ? `${course.level} ` : ''}${subject.name}` : 'Worksheet';
   const paperSubtitle = course.board
     ? `${course.board} · Akbar Academy · A Class Above the Rest`
     : 'Akbar Academy';

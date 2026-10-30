@@ -1,5 +1,5 @@
 import Icon from './Icon';
-import { BOARDS, LEVELS, SUBJECTS } from '../lib/brand';
+import { SUBJECTS } from '../lib/brand';
 
 
 function StepLabel({ number, title, hint }) {
@@ -31,11 +31,7 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
 
   const courseCount =
     subject && level && board ? catalogue.courseCount(subject, level, board) : 0;
-  const picked = {
-    subject: SUBJECTS.find((s) => s.id === subject),
-    level: LEVELS.find((l) => l.id === level),
-    board: BOARDS.find((b) => b.id === board),
-  };
+  const pickedSubject = SUBJECTS.find((s) => s.id === subject);
 
   return (
     <section className="launcher">
@@ -90,27 +86,28 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
         <div className="step">
           <StepLabel number="2" title="Choose an exam board" />
           <div className="chip-row">
-            {BOARDS.map((item) => {
+            {/* The boards the catalog API lists, with its own names. */}
+            {catalogue.boards.map((item) => {
               // A board is open if any level of this subject has questions for it.
-              const locked = LEVELS.every(
-                (l) => catalogue.courseCount(subject, l.id, item.id) === 0,
+              const locked = catalogue.levels.every(
+                (l) => catalogue.courseCount(subject, l, item) === 0,
               );
               return (
                 <button
-                  key={item.id}
+                  key={item}
                   type="button"
                   className={[
                     'chip',
-                    board === item.id ? 'is-active' : '',
+                    board === item ? 'is-active' : '',
                     locked ? 'is-locked' : '',
                   ]
                     .filter(Boolean)
                     .join(' ')}
                   disabled={locked}
-                  aria-pressed={board === item.id}
-                  onClick={() => onChange('board', item.id)}
+                  aria-pressed={board === item}
+                  onClick={() => onChange('board', item)}
                 >
-                  {item.full}
+                  {item}
                   {locked ? <span className="chip-note">In build</span> : null}
                 </button>
               );
@@ -123,24 +120,25 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
         <div className="step">
           <StepLabel number="3" title="Choose a level" />
           <div className="chip-row">
-            {LEVELS.map((item) => {
-              const locked = catalogue.courseCount(subject, item.id, board) === 0;
+            {/* The levels the catalog API lists, with its own names. */}
+            {catalogue.levels.map((item) => {
+              const locked = catalogue.courseCount(subject, item, board) === 0;
               return (
                 <button
-                  key={item.id}
+                  key={item}
                   type="button"
                   className={[
                     'chip',
-                    level === item.id ? 'is-active' : '',
+                    level === item ? 'is-active' : '',
                     locked ? 'is-locked' : '',
                   ]
                     .filter(Boolean)
                     .join(' ')}
                   disabled={locked}
-                  aria-pressed={level === item.id}
-                  onClick={() => onChange('level', item.id)}
+                  aria-pressed={level === item}
+                  onClick={() => onChange('level', item)}
                 >
-                  {item.name}
+                  {item}
                   {locked ? <span className="chip-note">In build</span> : null}
                 </button>
               );
@@ -152,15 +150,14 @@ export default function SubjectLauncher({ course, catalogue, loading, onChange, 
       {/* Once the whole course is picked: a card for it, like the AI Tutor's
           book card, with the button on the right. */}
       {courseCount > 0 ? (
-        <div className="launcher-go" style={{ '--accent': picked.subject?.accent }}>
+        <div className="launcher-go" style={{ '--accent': pickedSubject?.accent }}>
           <span className="go-mascot">
-            <img src={picked.subject?.icon} alt="" />
+            <img src={pickedSubject?.icon} alt="" />
           </span>
           <span className="go-text">
             <span className="go-title">
-              {picked.board?.name} {picked.level?.name} {picked.subject?.name}
+              {board} {level} {pickedSubject?.name}
             </span>
-            <span className="go-meta">{picked.board?.full}</span>
           </span>
           <button type="button" className="go-btn" onClick={onOpen}>
             Open the question bank
