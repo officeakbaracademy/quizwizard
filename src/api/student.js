@@ -24,9 +24,13 @@ export function getStudentLogin() {
  *   "Cambridge International" with the level "AS Level" -> Cambridge, AS
  * Its "Full Syllabus" and "Half Syllabus" are not levels in the question bank;
  * the level for those comes from the board name ("... IGCSE").
+ *
+ * Both sides are read this way when they are compared, so a name matches
+ * however it is written: with a dash or a space ("Cambridge - IGCSE" or
+ * "Cambridge IGCSE"), and before or after the question bank is renamed.
  */
-function toBoard(text) {
-  const value = text.toLowerCase();
+export function toBoard(text) {
+  const value = String(text || '').toLowerCase();
   if (value.includes('cambridge')) return 'Cambridge';
   if (value.includes('edexcel')) return 'Edexcel';
   // "Oxford International GCSE" and "Oxford International AQA" are both AQA.
@@ -34,11 +38,13 @@ function toBoard(text) {
   return null;
 }
 
-function toLevel(boardText, levelText) {
-  const board = boardText.toLowerCase();
-  const level = levelText.toLowerCase();
+export function toLevel(boardText, levelText) {
+  const board = String(boardText || '').toLowerCase();
+  const level = String(levelText || '').toLowerCase();
   if (board.includes('igcse') || board.includes('international gcse')) return 'IGCSE';
   if (/\bgcse\b/.test(board)) return 'GCSE';
+  if (/\bigcse\b/.test(level)) return 'IGCSE';
+  if (/\bgcse\b/.test(level)) return 'GCSE';
   if (/\bas\b/.test(level)) return 'AS';
   if (/\ba2\b|\ba level\b/.test(level)) return 'A2';
   return null;

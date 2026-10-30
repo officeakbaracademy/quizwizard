@@ -1,5 +1,6 @@
 /** Pure helpers over the question bank. No React, no DOM. */
 
+import { toBoard, toLevel } from '../api/student';
 import { subjectOf } from './brand';
 
 export const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
@@ -71,10 +72,15 @@ export function buildCatalogue(catalog) {
     boards: (catalog?.boards || []).map((board) => board.name),
     levels: (catalog?.levels || []).map((level) => level.name),
     // Whether the student has this subject (and board, and level, when given).
+    // The catalog's names are read the same way as the student's, so they
+    // match however each side writes them.
     allows: (subject, board, level) =>
       !student ||
       student.some(
-        (c) => c.subject === subject && (!board || c.board === board) && (!level || c.level === level),
+        (c) =>
+          c.subject === subject &&
+          (!board || c.board === toBoard(board)) &&
+          (!level || c.level === toLevel(board, level)),
       ),
     subjectCount: (subject) => count((c) => c.subject === subject),
     courseCount: (subject, level, board) =>
