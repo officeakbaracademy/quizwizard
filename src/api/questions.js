@@ -1,5 +1,6 @@
 /**
- * The question bank, loaded from the backend's search API.
+ * The question bank: the catalog (what courses exist) and each course's
+ * questions, from the backend's catalog and search APIs.
  *
  * A question record:
  *
@@ -11,5 +12,6 @@
  */
 export {
   fetchBackendQuestionBank as fetchQuestionBank,
+  fetchCatalog,
   searchBackendQuestions,
 } from './backendQuestions';

@@ -17,6 +17,7 @@ import WorksheetOptions from './components/WorksheetOptions';
 
 import { searchBackendQuestions } from './api/questions';
 import { pickQuestionsByMarks, sortQuestionsByMarks } from './api/worksheets';
+import { useCatalog } from './hooks/useCatalog';
 import { useQuestionBank } from './hooks/useQuestionBank';
 import { useTheme } from './hooks/useTheme';
 import { getLevel, getSubject } from './lib/brand';
@@ -24,7 +25,6 @@ import {
   EMPTY_COURSE,
   EMPTY_FILTERS,
   buildCatalogue,
-  dependentOptions,
   questionsForCourse,
   summariseBank,
   totalMarksOf,
@@ -36,17 +36,22 @@ const TABLE_PAGE_SIZE = 20;
 export default function App() {
   const { theme, setTheme } = useTheme();
 
+  const [course, setCourse] = useState(EMPTY_COURSE);
+
+  // The catalog API says which courses exist; the chosen course's questions
+  // load once its subject, board and level are picked.
+  const { catalog, loading: catalogLoading, error: catalogError, reload: reloadCatalog } = useCatalog();
   const {
     questions,
-    loading,
-    error,
-    reload,
+    loading: bankLoading,
+    error: bankError,
+    reload: reloadBank,
     getQuestionImages,
     getMarkSchemeImages,
     hasMarkScheme,
-  } = useQuestionBank();
-
-  const [course, setCourse] = useState(EMPTY_COURSE);
+  } = useQuestionBank(course);
+  const error = catalogError || bankError;
+  const reload = catalogError ? reloadCatalog : reloadBank;
   const [view, setView] = useState('launcher');
 
   // Switching between the course picker and the question bank always starts
@@ -73,7 +78,7 @@ export default function App() {
   // Filters the current results came from, sent with worksheet requests.
   const [appliedFilters, setAppliedFilters] = useState(EMPTY_FILTERS);
 
-  const catalogue = useMemo(() => buildCatalogue(questions), [questions]);
+  const catalogue = useMemo(() => buildCatalogue(catalog), [catalog]);
 
   const courseQuestions = useMemo(
     () => questionsForCourse(questions, course),
@@ -106,10 +111,11 @@ export default function App() {
   // The cards describe what's on screen, so they follow the filters.
   const stats = useMemo(() => summariseBank(results), [results]);
   const syllabuses = useMemo(() => uniqueSyllabuses(courseQuestions), [courseQuestions]);
-  const { papers, topics } = useMemo(
-    () => dependentOptions(courseQuestions, filters.syllabus),
-    [courseQuestions, filters.syllabus],
-  );
+  // The Paper and Topic drop-downs come from the catalog, for the open course.
+  const { papers, topics } = catalogue.course(course.subject, course.level, course.board) || {
+    papers: [],
+    topics: [],
+  };
 
   const selectedQuestions = useMemo(
     () => courseQuestions.filter((question) => selectedIds.has(question.id)),
@@ -371,17 +377,21 @@ export default function App() {
                 Try again
               </button>
             </div>
-          ) : loading ? (
+          ) : catalogLoading || (view === 'bank' && bankLoading) ? (
             <div className="state-card">
               <span className="spinner" />
-              <h3>Loading the question bank</h3>
-              <p>Pulling in questions, mark schemes and scanned pages.</p>
+              <h3>{catalogLoading ? 'Loading the courses' : 'Loading the question bank'}</h3>
+              <p>
+                {catalogLoading
+                  ? 'Checking which subjects, boards and levels are ready.'
+                  : 'Pulling in questions, mark schemes and scanned pages.'}
+              </p>
             </div>
           ) : !showBank ? (
             <SubjectLauncher
               course={course}
               catalogue={catalogue}
-              loading={loading}
+              loading={catalogLoading}
               onChange={handleCourseChange}
               onOpen={() => setView('bank')}
             />

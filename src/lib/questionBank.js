@@ -1,6 +1,6 @@
 /** Pure helpers over the question bank. No React, no DOM. */
 
-import { BOARDS, LEVELS, SUBJECTS, boardOf, levelOf, subjectOf } from './brand';
+import { boardOf, levelOf, subjectOf } from './brand';
 
 export const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 
@@ -44,50 +44,29 @@ export function totalMarksOf(questions) {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Counts what the loaded bank actually holds for every subject, level and
- * board in the academy catalogue. Combinations with a count of zero are the
- * ones still being built, and the launcher shows them as such.
+ * The course picker's view of the catalog API: which subject, level and board
+ * combinations exist, how many questions each has, and each course's paper
+ * labels and topics (for the filter drop-downs). Anything with no questions
+ * is shown as "in build".
+ * catalog: what fetchCatalog returns, or null while it loads.
  */
-export function buildCatalogue(questions) {
-  const bySubject = {};
-  const byLevel = {};
-  const byBoard = {};
-  const byCourse = {};
-
-  SUBJECTS.forEach((s) => {
-    bySubject[s.id] = 0;
-  });
-  LEVELS.forEach((l) => {
-    byLevel[l.id] = {};
-  });
-  BOARDS.forEach((b) => {
-    byBoard[b.id] = {};
-  });
-
-  questions.forEach((question) => {
-    const subject = subjectOf(question);
-    const level = levelOf(question);
-    const board = boardOf(question);
-
-    bySubject[subject] = (bySubject[subject] || 0) + 1;
-
-    byLevel[level] = byLevel[level] || {};
-    byLevel[level][subject] = (byLevel[level][subject] || 0) + 1;
-
-    byBoard[board] = byBoard[board] || {};
-    const boardKey = `${subject}|${level}`;
-    byBoard[board][boardKey] = (byBoard[board][boardKey] || 0) + 1;
-
-    const courseKey = `${subject}|${level}|${board}`;
-    byCourse[courseKey] = (byCourse[courseKey] || 0) + 1;
-  });
+export function buildCatalogue(catalog) {
+  const courses = (catalog?.courses || []).map((course) => ({
+    subject: subjectOf({ subject: course.name }),
+    level: levelOf({ level: course.level }),
+    board: boardOf({ board: course.board }),
+    total: course.total || 0,
+    papers: course.papers || [],
+    topics: (course.topics || []).filter((t) => t.active !== false).map((t) => t.name),
+  }));
+  const count = (match) => courses.filter(match).reduce((sum, c) => sum + c.total, 0);
 
   return {
-    subjectCount: (subject) => bySubject[subject] || 0,
-    levelCount: (level, subject) => (byLevel[level] && byLevel[level][subject]) || 0,
-    boardCount: (board, subject, level) =>
-      (byBoard[board] && byBoard[board][`${subject}|${level}`]) || 0,
-    courseCount: (subject, level, board) => byCourse[`${subject}|${level}|${board}`] || 0,
+    subjectCount: (subject) => count((c) => c.subject === subject),
+    courseCount: (subject, level, board) =>
+      count((c) => c.subject === subject && c.level === level && c.board === board),
+    course: (subject, level, board) =>
+      courses.find((c) => c.subject === subject && c.level === level && c.board === board) || null,
   };
 }
 
@@ -107,18 +86,6 @@ export function questionsForCourse(questions, { subject, level, board }) {
 
 export function uniqueSyllabuses(questions) {
   return [...new Set(questions.map((q) => q.syllabus).filter(Boolean))];
-}
-
-/**
- * Paper and topic options depend on the selected syllabus: picking a syllabus
- * narrows both lists to what that syllabus actually contains.
- */
-export function dependentOptions(questions, syllabus) {
-  const source = syllabus ? questions.filter((q) => q.syllabus === syllabus) : questions;
-  return {
-    papers: [...new Set(source.map((q) => q.paper).filter(Boolean))].sort(),
-    topics: [...new Set(source.map((q) => q.topic).filter(Boolean))].sort(),
-  };
 }
 
 export function pluraliseMarks(marks) {

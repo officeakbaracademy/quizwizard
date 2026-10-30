@@ -132,9 +132,36 @@ function toQuestion(row) {
   };
 }
 
-/** Same result shape as the static snapshot: questions plus two image lookups. */
-export async function fetchBackendQuestionBank({ signal } = {}) {
-  const { rows } = await fetchAllRows(signal);
+/**
+ * What Quiz Wizard offers, from GET /question-bank/catalog: the active boards,
+ * levels and courses, each course with its paper labels and topics. One tiny
+ * search per course (page_size 1) adds its question count, for the
+ * "N questions" tags on the course picker.
+ */
+export async function fetchCatalog({ signal } = {}) {
+  const catalog = await request('/question-bank/catalog', { signal });
+  const courses = (catalog.subjects || []).filter((course) => course.active !== false);
+  const totals = await Promise.all(
+    courses.map((course) =>
+      request('/question-bank/questions/search', {
+        params: { board: course.board, level: course.level, subject: course.name, page: 1, page_size: 1 },
+        signal,
+      }).then((data) => data.total ?? 0),
+    ),
+  );
+  return {
+    boards: (catalog.boards || []).filter((board) => board.active !== false),
+    levels: (catalog.levels || []).filter((level) => level.active !== false),
+    courses: courses.map((course, i) => ({ ...course, total: totals[i] })),
+  };
+}
+
+/**
+ * One course's questions plus two image lookups.
+ * course: the API's own names, e.g. { board: "Cambridge", level: "IGCSE", subject: "Physics" }.
+ */
+export async function fetchBackendQuestionBank({ signal, course } = {}) {
+  const { rows } = await fetchAllRows(signal, course);
 
   const questions = rows.map(toQuestion);
   const questionImages = {};

@@ -1,28 +1,42 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchQuestionBank } from '../api/questions';
+import { getBoard, getLevel, getSubject } from '../lib/brand';
 
 const EMPTY = [];
 
 /**
- * Loads the question bank once and exposes it alongside the image lookups.
- * Swapping the static JSON for a live API happens entirely inside
- * `fetchQuestionBank`, so nothing here changes when the backend arrives.
+ * Loads the chosen course's questions (and their image lookups) once the
+ * subject, level and board are all picked. Nothing loads before that.
+ * course: the app's ids, e.g. { subject: "physics", level: "IGCSE", board: "Cambridge" }.
  */
-export function useQuestionBank() {
+export function useQuestionBank(course) {
   const [state, setState] = useState({
     questions: EMPTY,
     questionImages: {},
     markSchemeImages: {},
-    loading: true,
+    loading: false,
     error: null,
   });
 
+  // The course in the API's own names, e.g. { subject: "Physics", ... }.
+  const subjectName = getSubject(course.subject)?.name;
+  const levelName = getLevel(course.level)?.id;
+  const boardName = getBoard(course.board)?.id;
+
   const load = useCallback(() => {
+    if (!subjectName || !levelName || !boardName) {
+      setState({ questions: EMPTY, questionImages: {}, markSchemeImages: {}, loading: false, error: null });
+      return undefined;
+    }
     const controller = new AbortController();
 
-    setState((previous) => ({ ...previous, loading: true, error: null }));
+    // Clear the last course's questions so they never show under this one.
+    setState({ questions: EMPTY, questionImages: {}, markSchemeImages: {}, loading: true, error: null });
 
-    fetchQuestionBank({ signal: controller.signal })
+    fetchQuestionBank({
+      signal: controller.signal,
+      course: { subject: subjectName, level: levelName, board: boardName },
+    })
       .then(({ questions, questionImages, markSchemeImages }) => {
         setState({
           questions,
@@ -45,7 +59,7 @@ export function useQuestionBank() {
       });
 
     return () => controller.abort();
-  }, []);
+  }, [subjectName, levelName, boardName]);
 
   useEffect(load, [load]);
 

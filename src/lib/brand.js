@@ -18,6 +18,7 @@ export const SUBJECTS = [
 
 export const LEVELS = [
   { id: 'IGCSE', name: 'IGCSE', note: 'Year 10 and 11' },
+  { id: 'GCSE', name: 'GCSE', note: 'Year 10 and 11' },
   { id: 'AS', name: 'AS Level', note: 'Year 12' },
   { id: 'A2', name: 'A2 Level', note: 'Year 13' },
 ];
@@ -58,6 +59,7 @@ export function levelOf(question) {
   const value = String(question.level || '').toUpperCase();
   if (value.includes('A2') || value.includes('A LEVEL')) return 'A2';
   if (value.includes('AS')) return 'AS';
+  if (value === 'GCSE') return 'GCSE';
   return 'IGCSE';
 }
 
